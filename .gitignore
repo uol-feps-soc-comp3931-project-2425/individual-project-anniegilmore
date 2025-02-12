@@ -1,2 +1,6 @@
 dataset/resized_train/resized_train/*.jpeg
 dataset/resized_train_cropped/resized_train_cropped/*.jpeg
+
+# virtualenv
+.venv/
+venv/
