@@ -4,3 +4,13 @@ dataset/resized_train_cropped/resized_train_cropped/*.jpeg
 # virtualenv
 .venv/
 venv/
+
+.idea/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc

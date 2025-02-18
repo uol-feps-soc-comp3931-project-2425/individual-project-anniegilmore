@@ -1,0 +1,67 @@
+import csv
+from pathlib import Path
+from typing import Any
+
+
+import torchvision.transforms as transforms
+from PIL import Image
+from torch.utils.data import Dataset
+
+from constants import DATASET_PATH
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
+
+
+PATH_TO_IMAGES = Path(f"{DATASET_PATH}/images")
+
+
+class AttributesDataset:
+    def __init__(self) -> None:
+
+        self.diabetic_retinopathy_levels = ["0", "1", "2", "3", "4"]
+        self.num_classes = len(self.diabetic_retinopathy_levels)
+
+        self.level_to_id = dict(
+            zip(
+                self.diabetic_retinopathy_levels,
+                range(len(self.diabetic_retinopathy_levels)),
+                strict=False,
+            )
+        )
+
+
+class RetinalImageDataset(Dataset):
+    def __init__(
+        self,
+        annotation_path: Path,
+        attributes: AttributesDataset,
+        transform: transforms.Compose,
+    ) -> None:
+        super().__init__()
+        self.transform = transform
+        self.attr = attributes
+        # arrays to store ground truth labels
+        self.data = []
+        self.diabetic_retinopathy_levels = []
+
+        with open(annotation_path) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                self.data.append(row["image"])
+                self.diabetic_retinopathy_levels.append(
+                    self.attr.level_to_id[row["level"]]
+                )
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __getitem__(self, idx: int) -> dict[str, Any]:
+        img_path: str = f"{self.data[idx]}.jpeg"
+        img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
+        if self.transform:
+            img = self.transform(img)
+        dict_data = {
+            "img": img,
+            "levels": self.diabetic_retinopathy_levels[idx],
+        }
+        return dict_data
