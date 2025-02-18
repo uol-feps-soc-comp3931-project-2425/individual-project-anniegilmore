@@ -1,0 +1,8 @@
+2025-02-18 12:45:10,205 - train - INFO - 
+Iteration 1
+2025-02-18 12:46:52,441 - train - INFO - Epoch 1, loss: 11.755, accuracy: 18.858%
+2025-02-18 12:47:18,613 - validation - INFO - epoch 1: Validation  loss: 2.283, accuracy: 18.682%
+2025-02-18 12:49:12,340 - train - INFO - Epoch 2, loss: 2.27, accuracy: 19.759%
+2025-02-18 12:49:37,090 - validation - INFO - epoch 2: Validation  loss: 1.978, accuracy: 18.553%
+2025-02-18 12:49:37,416 - train - INFO - Saved checkpoint: training_resources\Iteration_1\checkpoints\checkpoint-epoch-2.pth
+2025-02-18 12:49:37,418 - train - INFO - Took 267.212 seconds to train 2 epochs, which is 4.454 minutes
