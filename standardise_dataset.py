@@ -35,7 +35,8 @@ def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
     return level_image_map
 
 
-def standardize_dataset(path_to_dataset: Path) -> None:
+def standardize_dataset(path_to_dataset: Path) -> str:
+    path_to_labels: str = "dataset/standardised_trainLabels.csv"
     level_image_map: dict[str, list[str]] = get_level_distribution_map(path_to_dataset)
     min_count: int = len(level_image_map["0"])
     for level_images in level_image_map.values():
@@ -50,23 +51,30 @@ def standardize_dataset(path_to_dataset: Path) -> None:
         "4": [],
     }
     dict_to_write: list[dict[str, str]] = []
+    chosen_images: list[str] =[]
     for level_to_fill in standardised_level_image_map:
         count: int = 0
         while count != min_count:
-            dict_to_write.append(
-                {
-                    "image": random.choice(level_image_map[level_to_fill]),
-                    "level": level_to_fill,
-                }
-            )
-            count += 1
-    with open("dataset/standardised_trainLabels.csv", "w", newline="") as csvfile:
+            image = random.choice(level_image_map[level_to_fill])
+            if image not in chosen_images:
+                chosen_images.append(image)
+                dict_to_write.append(
+                    {
+                        "image": image,
+                        "level": level_to_fill,
+                    }
+                )
+                count += 1
+            else:
+                continue
+    with open(path_to_labels, "w", newline="") as csvfile:
         dict_writer = csv.DictWriter(csvfile, fieldnames=["image", "level"])
         dict_writer.writeheader()
         dict_writer.writerows(dict_to_write)
+    return path_to_labels
 
 
-def split_data(data_to_split: list[str], percentage_train: float) -> None:
+def split_data(original_annotations: Path, data_to_split: list[str], percentage_train: float) -> None:
     new_dataset_path: str = f"{BASE_PATH}/dataset_{percentage_train}"
     make_path(Path(new_dataset_path))
     make_path(Path(f"{new_dataset_path}/images"))
@@ -86,9 +94,9 @@ def split_data(data_to_split: list[str], percentage_train: float) -> None:
         Path(f"{new_dataset_path}/images"),
     )
     write_moved_annotations(
-        validation_images, Path(f"{new_dataset_path}/validateLabels.csv")
+        original_annotations, validation_images, Path(f"{new_dataset_path}/validateLabels.csv")
     )
-    write_moved_annotations(train_images, Path(f"{new_dataset_path}/trainLabels.csv"))
+    write_moved_annotations(original_annotations, train_images, Path(f"{new_dataset_path}/trainLabels.csv"))
 
 
 def move_images(
@@ -115,25 +123,70 @@ def write_csv_header(annotations_file: Path) -> None:
         writer.writeheader()
 
 
-def write_moved_annotations(moved_images: list[str], annotations_file: Path) -> None:
+def write_moved_annotations(annotations_path: Path, moved_images: list[str], annotations_file: Path) -> None:
     write_csv_header(annotations_file)
-    with open(OG_ANNOTATIONS_PATH, "r", newline="") as file:
+    with open(annotations_path, "r", newline="") as file:
         annotations: csv.DictReader[str] = csv.DictReader(file)
         for row in annotations:
             if row["image"] in moved_images:
                 write_csv_rows(annotations_file, row)
-                
+
+def group_images_into_3_classes(path_to_dataset: Path) -> str:
+    path_to_labels: str = "dataset/3_class_classification.csv"
+    level_image_map = get_level_distribution_map(path_to_dataset)
+    grouped_image_map: dict[str, list[str]] = {
+        "0": [],
+        "1": [],
+        "2": [],
+    } 
+    dict_to_write: list[dict[str, str]] = []
+    grouped_image_map["0"] = level_image_map["0"]
+    grouped_image_map["1"] = level_image_map["1"] + level_image_map["2"]
+    grouped_image_map["2"] = level_image_map["3"] + level_image_map["4"]
+    reduced_image_map = reduce_dataset(grouped_image_map, 7000)
+    for level in reduced_image_map:
+        for image in reduced_image_map[level]:
+            dict_to_write.append(
+                {
+                    "image": image,
+                    "level": level,
+                }
+            ) 
+    random.shuffle(dict_to_write)
+    with open(path_to_labels, "w", newline="") as csvfile:
+        dict_writer = csv.DictWriter(csvfile, fieldnames=["image", "level"])
+        dict_writer.writeheader()
+        dict_writer.writerows(dict_to_write)
+    print(f"In class 0: {len(reduced_image_map['0'])}")
+    print(f"In class 1: {len(reduced_image_map['1'])}")
+    print(f"In class 2: {len(reduced_image_map['2'])}")
+    return path_to_labels
+
+def reduce_dataset(image_map: dict[str, list[str]], max_class: int) -> dict[str, list[str]]:
+    new_image_map: dict[str, list[str]] = {"0": [], "1": [], "2": []}
+    for level in image_map:
+        count: int = 0
+        while count != max_class and len(image_map[level]) > 0:
+            image = random.choice(image_map[level])
+            image_map[level].remove(image)
+            new_image_map[level].append(image)
+            count += 1
+    return new_image_map
+            
 
 if __name__ == "__main__":
-    count = get_level_distribution_map(OG_ANNOTATIONS_PATH)
-    standardize_dataset(OG_ANNOTATIONS_PATH)
+    # count = get_level_distribution_map(OG_ANNOTATIONS_PATH)
+    # path_to_labels = standardize_dataset(OG_ANNOTATIONS_PATH)
+    
+    path_to_labels = group_images_into_3_classes(OG_ANNOTATIONS_PATH)
+    
     if USING_ORIGINAL_DISTRIBUTION:
         data: list[str] = [
             f"{image_name.stem}.jpeg" for image_name in Path.glob(Path(f"{OG_DATASET_PATH}/resized_train/resized_train"), "*.jpeg")
         ]
     else:
-        with open("dataset/standardised_trainLabels.csv", "r", newline="") as csvfile:
+        with open(path_to_labels, "r", newline="") as csvfile:
             dataset_reader = csv.reader(csvfile, delimiter=",")
             data: list[str] = [f"{row[0]}.jpeg" for row in dataset_reader]
             del(data[0])
-    split_data(data, 0.8)
+    split_data(Path(path_to_labels), data, 0.8)

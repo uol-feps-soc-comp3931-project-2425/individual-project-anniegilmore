@@ -8,9 +8,29 @@ NUM_WORKERS = 4
 LEARNING_RATE = 0.1
 DROPOUT = 0.2
 CLASSIFIER_STRUCT = """
-nn.BatchNorm1d(last_channel),
-nn.Dropout(p=DROPOUT),
-nn.Linear(in_features=last_channel, out_features=n_quality_scores)"""
+            nn.Linear(in_features=last_channel, out_features=64),
+            nn.ReLU(),
+            nn.Linear(in_features=64, out_features=128),
+            nn.ReLU(),
+            nn.Linear(in_features=128, out_features=256),
+            nn.ReLU(),
+            nn.Linear(in_features=256, out_features=512),
+            nn.ReLU(),
+            nn.Linear(in_features=512, out_features=512),
+            nn.ReLU(),
+            nn.Linear(in_features=512, out_features=4096),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(in_features=4096, out_features=n_diabetic_retinopathy_levels),
+            nn.Softmax(dim=1),"""
+            
+EXTRA_INFO = """
+Changes here:
+Dataset still has 3 classes
+7000 images in classes 0 and 1
+class 3 has around 1300 images in
+aiming to implement class weights through use of focal loss criterion when calculating loss
+using resnet50 for transfer learning instead of mobilenet"""
 
 
 def log_hyperparameters() -> None:
@@ -27,3 +47,4 @@ def log_hyperparameters() -> None:
     hyperparameter_logger.info(f"Dropout: {DROPOUT}")
     hyperparameter_logger.info("Model used in Transfer Learning: mobilenet v2")
     hyperparameter_logger.info(f"\nClassifier structure: {CLASSIFIER_STRUCT}\n\n")
+    hyperparameter_logger.info(f"\nExtra information:\n{EXTRA_INFO}")

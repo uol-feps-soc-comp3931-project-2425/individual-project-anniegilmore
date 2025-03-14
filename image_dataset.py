@@ -18,7 +18,7 @@ PATH_TO_IMAGES = Path(f"{DATASET_PATH}/images")
 class AttributesDataset:
     def __init__(self) -> None:
 
-        self.diabetic_retinopathy_levels = ["0", "1", "2", "3", "4"]
+        self.diabetic_retinopathy_levels = ["0", "1", "2"]
         self.num_classes = len(self.diabetic_retinopathy_levels)
 
         self.level_to_id = dict(
@@ -43,6 +43,11 @@ class RetinalImageDataset(Dataset):
         # arrays to store ground truth labels
         self.data = []
         self.diabetic_retinopathy_levels = []
+        self.class_weights = []
+        
+        class_counts = {}
+        for potential_level in attributes.diabetic_retinopathy_levels:
+            class_counts[potential_level] = 0
 
         with open(annotation_path) as f:
             reader = csv.DictReader(f)
@@ -51,6 +56,13 @@ class RetinalImageDataset(Dataset):
                 self.diabetic_retinopathy_levels.append(
                     self.attr.level_to_id[row["level"]]
                 )
+                class_counts[row["level"]] += 1
+        
+        total_samples = len(self.data)
+        for count in class_counts:
+            weight = 1 / (class_counts[count] / total_samples)
+            self.class_weights.append(weight)
+            
 
     def __len__(self) -> int:
         return len(self.data)

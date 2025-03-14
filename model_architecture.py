@@ -14,9 +14,21 @@ class DiabeticRetinopathyNet(nn.Module):
         last_channel = mobilenet.last_channel
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
-            nn.BatchNorm1d(last_channel),
-            nn.Dropout(p=0.2),
-            nn.Linear(in_features=last_channel, out_features=n_diabetic_retinopathy_levels),
+            nn.Linear(in_features=last_channel, out_features=64),
+            nn.ReLU(),
+            nn.Linear(in_features=64, out_features=128),
+            nn.ReLU(),
+            nn.Linear(in_features=128, out_features=256),
+            nn.ReLU(),
+            nn.Linear(in_features=256, out_features=512),
+            nn.ReLU(),
+            nn.Linear(in_features=512, out_features=512),
+            nn.ReLU(),
+            nn.Linear(in_features=512, out_features=4096),
+            nn.ReLU(),
+            nn.Dropout(0.2),
+            nn.Linear(in_features=4096, out_features=n_diabetic_retinopathy_levels),
+            nn.Softmax(dim=1),
         )
 
     def forward(self, x: Any) -> dict[str, torch.Tensor]:

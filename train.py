@@ -5,6 +5,7 @@ from typing import Any
 import matplotlib.pyplot as plt
 import torch
 import torchvision.transforms as transforms
+from focal_loss import FocalLoss
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATASET_PATH, DATA_PATH, ITERATION, NUM_EPOCHS, START_EPOCH
 from hyperparameters import (
@@ -27,7 +28,7 @@ GRAPH_PATH = f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/graphs"
 TRAINING_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/trainLabels.csv")
 VALIDATION_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/validateLabels.csv")
 
-SAVE_PROGRESS_INTERVAL = 2
+SAVE_PROGRESS_INTERVAL = 5
 
 logger = setup_logger(
     "train", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
@@ -83,10 +84,12 @@ def run_epoch(
 ) -> tuple[dict[str, list], DiabeticRetinopathyNet, Adam]:
     current_loss: float = 0.0
     accuracy: float = 0.0
+    class_weights: torch.FloatTensor = torch.FloatTensor(train_dataloader.dataset.class_weights)
+    # print(np.bincount(train_dataloader))
     n_train_samples: int = len(train_dataloader)
     for batch_data in train_dataloader:
         current_loss, accuracy = run_batch(
-            model, optimizer, current_loss, accuracy, batch_data
+            model, optimizer, current_loss, accuracy, batch_data, class_weights
         )
     total_training_loss: float = round((current_loss / n_train_samples), 3)
     total_training_accuracy: float = round(100 * (accuracy / n_train_samples), 3)
@@ -104,13 +107,16 @@ def run_batch(
     current_loss: float,
     accuracy: float,
     batch_data: Any,
+    class_weights: torch.FloatTensor,
 ) -> tuple[float, float]:
     inputs = batch_data["img"]
     targets = batch_data["levels"].to(get_device())
     optimizer.zero_grad()
     output: dict[str, torch.Tensor] = model(inputs.to(get_device()))
     accuracy += calculate_metrics(output, targets)
-    training_loss: torch.Tensor = model.get_loss(output, targets)
+    # training_loss: torch.Tensor = model.get_loss(output, targets)
+    criterion = FocalLoss(alpha=class_weights, gamma=3)
+    training_loss = criterion(output["level"], targets)
     training_loss.backward()
     optimizer.step()
     current_loss += training_loss.item()
@@ -174,14 +180,16 @@ def save_progress_graph(
             x_axis,
             graph_dir,
         )
-
+    
 
 def train_model() -> None:
     train_dataset, attributes = setup_dataset(
         image_transforms(), TRAINING_ANNOTATIONS_PATH
     )
+    print(train_dataset.class_weights)
     val_dataset, _ = setup_dataset(image_transforms(), VALIDATION_ANNOTATIONS_PATH)
     train_loader: DataLoader = setup_dataloader(train_dataset)
+    print(train_loader.dataset.class_weights)
     val_loader: DataLoader = setup_dataloader(val_dataset)
     model_to_train: DiabeticRetinopathyNet = setup_model(attributes)
     optimizer: Adam = Adam(model_to_train.parameters(), lr=LEARNING_RATE)
