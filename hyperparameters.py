@@ -3,10 +3,10 @@ from pathlib import Path
 from constants import ITERATION, DATA_PATH
 from utils import setup_logger
 
-BATCH_SIZE = 32
+BATCH_SIZE = 64
 NUM_WORKERS = 4
 LEARNING_RATE = 0.01
-DROPOUT = 0.2
+DROPOUT = 0.0
 CLASSIFIER_STRUCT = """
             nn.Linear(in_features=last_channel, out_features=64),
             nn.ReLU(),
@@ -20,17 +20,14 @@ CLASSIFIER_STRUCT = """
             nn.ReLU(),
             nn.Linear(in_features=512, out_features=4096),
             nn.ReLU(),
-            nn.Dropout(0.2),
             nn.Linear(in_features=4096, out_features=n_diabetic_retinopathy_levels),
             nn.Softmax(dim=1),"""
             
 EXTRA_INFO = """
-Changes here:
-Dataset still has 3 classes
-7000 images in classes 0 and 1
-class 3 has around 1300 images in
-aiming to implement class weights through use of focal loss criterion when calculating loss
-using resnet50 for transfer learning instead of mobilenet"""
+Batch size increased from 32 to 64
+Learning rate set to 0.01
+Dropout reintroduced at 0.1
+"""
 
 
 def log_hyperparameters() -> None:

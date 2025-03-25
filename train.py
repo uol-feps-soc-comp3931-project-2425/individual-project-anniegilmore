@@ -62,9 +62,9 @@ def save_checkpoint(
 def image_transforms() -> transforms.Compose:
     return transforms.Compose(
         [
-            transforms.Resize((198, 198)),
+            transforms.Resize((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize(mean, std),
+            # transforms.Normalize(mean, std),
         ]
     )
 
@@ -122,10 +122,10 @@ def run_batch(
     targets = batch_data["levels"].to(get_device())
     optimizer.zero_grad()
     output: dict[str, torch.Tensor] = model(inputs.to(get_device()))
-    predicted_labels = output.argmax(dim=1).numpy()
+    predicted_labels = output["level"].argmax(dim=1).numpy()
     true_labels = targets.data.cpu().numpy()
-    accuracy += calculate_metrics(output, targets)
-    training_loss: torch.Tensor = F.cross_entropy(output, targets)
+    accuracy += calculate_metrics(output["level"], targets)
+    training_loss: torch.Tensor = F.cross_entropy(output["level"], targets)
     # training_loss: torch.Tensor = model.get_loss(output, targets)
     # criterion = FocalLoss(alpha=class_weights, gamma=3)
     # training_loss = criterion(output, targets)
@@ -169,15 +169,12 @@ def plot_graph(
 
 
 def setup_model(attributes: AttributesDataset) -> DiabeticRetinopathyNet:
-    # model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
-    #     n_diabetic_retinopathy_levels=attributes.num_classes
-    # ).to(get_device())
-    resnet50 = models.resnet50()
-    for param in resnet50.parameters():
-        param.requires_grad = False
-    last_channel = resnet50.fc.in_features
-    resnet50.fc = nn.Linear(last_channel, 3)
-    model = resnet50.to(get_device())
+    model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
+        n_diabetic_retinopathy_levels=attributes.num_classes
+    ).to(get_device())
+    # resnet50 = models.resnet50()
+    # for param in model.parameters():
+    #     param.requires_grad = False
     return model
 
 

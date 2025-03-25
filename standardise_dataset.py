@@ -128,10 +128,11 @@ def write_csv_header(annotations_file: Path) -> None:
 
 def write_moved_annotations(annotations_path: Path, moved_images: list[str], annotations_file: Path) -> None:
     write_csv_header(annotations_file)
+    # print(moved_images)
     with open(annotations_path, "r", newline="") as file:
         annotations: csv.DictReader[str] = csv.DictReader(file)
         for row in annotations:
-            if row["image"] in moved_images:
+            if f"{row['image']}.jpg" in moved_images:
                 write_csv_rows(annotations_file, row)
 
 def group_images_into_3_classes(path_to_dataset: Path) -> str:
@@ -147,7 +148,7 @@ def group_images_into_3_classes(path_to_dataset: Path) -> str:
     grouped_image_map["0"] = level_image_map["0"]
     grouped_image_map["1"] = level_image_map["1"] + level_image_map["2"]
     grouped_image_map["2"] = level_image_map["3"] + level_image_map["4"]
-    reduced_image_map = reduce_dataset(grouped_image_map, 2000)
+    reduced_image_map = reduce_dataset(grouped_image_map, 1000)
     for level in reduced_image_map:
         for image in reduced_image_map[level]:
             dict_to_write.append(
@@ -186,7 +187,7 @@ if __name__ == "__main__":
     
     if USING_ORIGINAL_DISTRIBUTION:
         data: list[str] = [
-            f"{image_name.stem}.jpeg" for image_name in Path.glob(Path(f"{OG_DATASET_PATH}/resized_train/resized_train"), "*.jpeg")
+            f"{image_name.stem}.jpg" for image_name in Path.glob(Path(f"{OG_DATASET_PATH}/resized_train/resized_train"), "*.jpeg")
         ]
     else:
         with open(path_to_labels, "r", newline="") as csvfile:

@@ -6,6 +6,7 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
+import torch.nn.functional as F
 
 import torch
 import torchvision.transforms as transforms
@@ -47,13 +48,14 @@ def model_validation_data(
         image_to_model = batch_data["img"]
         target_scores = batch_data["levels"].to(get_device())
         model_output = model(image_to_model.to(get_device()))
-        y_pred_labels = model_output.argmax(dim=1).numpy()
+        y_pred_labels = model_output["level"].argmax(dim=1).numpy()
         y_pred.extend(y_pred_labels)
         labels = target_scores.data.cpu().numpy()
         y_true.extend(labels)
         # val_train = model.get_loss(model_output, target_scores)
-        validation_loss += 0
-        validation_accuracy += calculate_metrics(model_output, target_scores)
+        val_train: torch.Tensor = F.cross_entropy(model_output["level"], target_scores)
+        validation_loss += val_train.item()
+        validation_accuracy += calculate_metrics(model_output["level"], target_scores)
     average_loss = round(validation_loss / len(dataloader), 3)
     average_accuracy = round(100 * (validation_accuracy / len(dataloader)), 3)
     # get_confusion_matrix(y_true, y_pred, epoch)
@@ -95,4 +97,5 @@ def calculate_metrics(output: Any, target: Any) -> float:
 
 
 def validation_transforms() -> transforms.Compose:
-    return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+    # return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+    return transforms.Compose([transforms.ToTensor()])

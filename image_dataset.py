@@ -60,7 +60,7 @@ class RetinalImageDataset(Dataset):
                 class_counts[row["level"]] += 1
         
         total_samples = len(self.data)
-        print(total_samples)
+        print(f"There are {total_samples} images")
         for count in class_counts:
             weight = 1 / (class_counts[count] / total_samples)
             self.class_weights.append(weight)
@@ -70,7 +70,7 @@ class RetinalImageDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
-        img_path: str = f"{self.data[idx]}.jpeg"
+        img_path: str = f"{self.data[idx]}.jpg"
         # img_path: str = f"{self.data[idx]}"
         img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
         if self.transform:
