@@ -19,6 +19,7 @@ class AttributesDataset:
     def __init__(self) -> None:
 
         self.diabetic_retinopathy_levels = ["0", "1", "2"]
+        # self.diabetic_retinopathy_levels = ["airplane", "cat", "deer"]
         self.num_classes = len(self.diabetic_retinopathy_levels)
 
         self.level_to_id = dict(
@@ -59,6 +60,7 @@ class RetinalImageDataset(Dataset):
                 class_counts[row["level"]] += 1
         
         total_samples = len(self.data)
+        print(total_samples)
         for count in class_counts:
             weight = 1 / (class_counts[count] / total_samples)
             self.class_weights.append(weight)
@@ -69,6 +71,7 @@ class RetinalImageDataset(Dataset):
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
         img_path: str = f"{self.data[idx]}.jpeg"
+        # img_path: str = f"{self.data[idx]}"
         img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
         if self.transform:
             img = self.transform(img)

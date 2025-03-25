@@ -16,5 +16,6 @@ __pycache__/
 *.pyc
 
 *.jpeg
+*.png
 *.log
 *.pth

@@ -5,7 +5,7 @@ from utils import setup_logger
 
 BATCH_SIZE = 32
 NUM_WORKERS = 4
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.01
 DROPOUT = 0.2
 CLASSIFIER_STRUCT = """
             nn.Linear(in_features=last_channel, out_features=64),

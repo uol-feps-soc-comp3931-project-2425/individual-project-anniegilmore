@@ -9,9 +9,11 @@ import torchvision.models as models
 class DiabeticRetinopathyNet(nn.Module):
     def __init__(self, n_diabetic_retinopathy_levels: int) -> None:
         super().__init__()
-        mobilenet = models.mobilenet_v2()
-        self.base_model = mobilenet.features
-        last_channel = mobilenet.last_channel
+        resnet50 = models.resnet50()
+        for param in resnet50.parameters():
+            param.requires_grad = False
+        self.base_model = resnet50
+        last_channel = resnet50.fc.in_features
         self.pool = nn.AdaptiveAvgPool2d((1, 1))
         self.classifier = nn.Sequential(
             nn.Linear(in_features=last_channel, out_features=64),

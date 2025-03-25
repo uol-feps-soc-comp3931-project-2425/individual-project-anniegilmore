@@ -4,11 +4,13 @@ import random
 import shutil
 from utils import make_path
 
-BASE_PATH = Path("../individual-project-dataset")
+# BASE_PATH = Path("../individual-project-dataset")
+BASE_PATH = Path("../aptos-2019-dataset")
 DATASET_PATH = Path(f"{BASE_PATH}/trainLabels.csv")
 CROPPED_DATASET_PATH = Path(f"{BASE_PATH}/trainLabels_cropped.csv")
 OG_DATASET_PATH = Path(f"{BASE_PATH}/untouched_dataset")
-OG_ANNOTATIONS_PATH = Path(f"{OG_DATASET_PATH}/trainLabels.csv")
+# OG_ANNOTATIONS_PATH = Path(f"{OG_DATASET_PATH}/trainLabels.csv")
+OG_ANNOTATIONS_PATH = Path(f"{BASE_PATH}/whole_dataset.csv")
 USING_ORIGINAL_DISTRIBUTION = False
 
 
@@ -78,7 +80,8 @@ def split_data(original_annotations: Path, data_to_split: list[str], percentage_
     new_dataset_path: str = f"{BASE_PATH}/dataset_{percentage_train}"
     make_path(Path(new_dataset_path))
     make_path(Path(f"{new_dataset_path}/images"))
-    original_data_dir: Path = Path(f"{OG_DATASET_PATH}/resized_train/resized_train")
+    # original_data_dir: Path = Path(f"{OG_DATASET_PATH}/resized_train/resized_train")
+    original_data_dir: Path = Path(f"{BASE_PATH}/images")
     num_validate_images: int = int(len(data_to_split) * (1 - percentage_train))
     num_train_images: int = int(len(data_to_split) - num_validate_images)
     validation_images = move_images(
@@ -132,7 +135,8 @@ def write_moved_annotations(annotations_path: Path, moved_images: list[str], ann
                 write_csv_rows(annotations_file, row)
 
 def group_images_into_3_classes(path_to_dataset: Path) -> str:
-    path_to_labels: str = "dataset/3_class_classification.csv"
+    # path_to_labels: str = "dataset/3_class_classification.csv"
+    path_to_labels: str = f"{BASE_PATH}/3_class_classification.csv"
     level_image_map = get_level_distribution_map(path_to_dataset)
     grouped_image_map: dict[str, list[str]] = {
         "0": [],
@@ -143,7 +147,7 @@ def group_images_into_3_classes(path_to_dataset: Path) -> str:
     grouped_image_map["0"] = level_image_map["0"]
     grouped_image_map["1"] = level_image_map["1"] + level_image_map["2"]
     grouped_image_map["2"] = level_image_map["3"] + level_image_map["4"]
-    reduced_image_map = reduce_dataset(grouped_image_map, 7000)
+    reduced_image_map = reduce_dataset(grouped_image_map, 2000)
     for level in reduced_image_map:
         for image in reduced_image_map[level]:
             dict_to_write.append(
@@ -187,6 +191,6 @@ if __name__ == "__main__":
     else:
         with open(path_to_labels, "r", newline="") as csvfile:
             dataset_reader = csv.reader(csvfile, delimiter=",")
-            data: list[str] = [f"{row[0]}.jpeg" for row in dataset_reader]
+            data: list[str] = [f"{row[0]}.jpg" for row in dataset_reader]
             del(data[0])
     split_data(Path(path_to_labels), data, 0.8)

@@ -1,11 +1,14 @@
 import time
 from pathlib import Path
 from typing import Any
+import torch.nn.functional as F
 
 import matplotlib.pyplot as plt
 import torch
 import torchvision.transforms as transforms
 from focal_loss import FocalLoss
+import torchvision.models as models
+import torch.nn as nn
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATASET_PATH, DATA_PATH, ITERATION, NUM_EPOCHS, START_EPOCH
 from hyperparameters import (
@@ -15,7 +18,7 @@ from hyperparameters import (
     log_hyperparameters,
 )
 from image_dataset import AttributesDataset, RetinalImageDataset, mean, std
-from validate import calculate_metrics, validate
+from validate import calculate_metrics, validate, get_confusion_matrix
 from torch.optim import Adam
 from torch.optim.lr_scheduler import StepLR
 from torch.utils.data import DataLoader
@@ -28,7 +31,7 @@ GRAPH_PATH = f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/graphs"
 TRAINING_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/trainLabels.csv")
 VALIDATION_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/validateLabels.csv")
 
-SAVE_PROGRESS_INTERVAL = 5
+SAVE_PROGRESS_INTERVAL = 2
 
 logger = setup_logger(
     "train", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
@@ -87,10 +90,16 @@ def run_epoch(
     class_weights: torch.FloatTensor = torch.FloatTensor(train_dataloader.dataset.class_weights)
     # print(np.bincount(train_dataloader))
     n_train_samples: int = len(train_dataloader)
+    print(f"There are {n_train_samples} samples\n")
+    y_predictions = []
+    y_true_labels = []
     for batch_data in train_dataloader:
-        current_loss, accuracy = run_batch(
+        current_loss, accuracy, y_pred, y_true = run_batch(
             model, optimizer, current_loss, accuracy, batch_data, class_weights
         )
+        y_predictions.extend(y_pred)
+        y_true_labels.extend(y_true)
+    get_confusion_matrix(y_true_labels, y_predictions, epoch)
     total_training_loss: float = round((current_loss / n_train_samples), 3)
     total_training_accuracy: float = round(100 * (accuracy / n_train_samples), 3)
     progress_tracker["Train Loss"].append(total_training_loss)
@@ -113,14 +122,17 @@ def run_batch(
     targets = batch_data["levels"].to(get_device())
     optimizer.zero_grad()
     output: dict[str, torch.Tensor] = model(inputs.to(get_device()))
+    predicted_labels = output.argmax(dim=1).numpy()
+    true_labels = targets.data.cpu().numpy()
     accuracy += calculate_metrics(output, targets)
+    training_loss: torch.Tensor = F.cross_entropy(output, targets)
     # training_loss: torch.Tensor = model.get_loss(output, targets)
-    criterion = FocalLoss(alpha=class_weights, gamma=3)
-    training_loss = criterion(output["level"], targets)
+    # criterion = FocalLoss(alpha=class_weights, gamma=3)
+    # training_loss = criterion(output, targets)
     training_loss.backward()
     optimizer.step()
     current_loss += training_loss.item()
-    return current_loss, accuracy
+    return current_loss, accuracy, predicted_labels, true_labels
 
 
 def setup_dataset(
@@ -157,9 +169,15 @@ def plot_graph(
 
 
 def setup_model(attributes: AttributesDataset) -> DiabeticRetinopathyNet:
-    model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
-        n_diabetic_retinopathy_levels=attributes.num_classes
-    ).to(get_device())
+    # model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
+    #     n_diabetic_retinopathy_levels=attributes.num_classes
+    # ).to(get_device())
+    resnet50 = models.resnet50()
+    for param in resnet50.parameters():
+        param.requires_grad = False
+    last_channel = resnet50.fc.in_features
+    resnet50.fc = nn.Linear(last_channel, 3)
+    model = resnet50.to(get_device())
     return model
 
 
