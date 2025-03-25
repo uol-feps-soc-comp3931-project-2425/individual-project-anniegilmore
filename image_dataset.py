@@ -12,7 +12,7 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
 
-PATH_TO_IMAGES = Path(f"{DATASET_PATH}/images")
+PATH_TO_IMAGES = Path(f"{DATASET_PATH}/processed_images")
 
 
 class AttributesDataset:
