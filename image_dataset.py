@@ -12,7 +12,7 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
 
-PATH_TO_IMAGES = Path(f"{DATASET_PATH}/images")
+PATH_TO_IMAGES = Path(f"{DATASET_PATH}/processed_images")
 
 
 class AttributesDataset:
@@ -70,7 +70,7 @@ class RetinalImageDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
-        img_path: str = f"{self.data[idx]}.jpeg"
+        img_path: str = f"{self.data[idx]}.jpg"
         # img_path: str = f"{self.data[idx]}"
         img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
         if self.transform:
