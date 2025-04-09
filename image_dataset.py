@@ -2,12 +2,13 @@ import csv
 from pathlib import Path
 from typing import Any
 
-
+import torchvision.transforms.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import Dataset
 
 from constants import DATASET_PATH
+
 mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
@@ -17,8 +18,7 @@ PATH_TO_IMAGES = Path(f"{DATASET_PATH}/processed_images")
 
 class AttributesDataset:
     def __init__(self) -> None:
-
-        self.diabetic_retinopathy_levels = ["0", "1", "2"]
+        self.diabetic_retinopathy_levels = ["0", "1", "2", "3"]
         # self.diabetic_retinopathy_levels = ["airplane", "cat", "deer"]
         self.num_classes = len(self.diabetic_retinopathy_levels)
 
@@ -45,7 +45,7 @@ class RetinalImageDataset(Dataset):
         self.data = []
         self.diabetic_retinopathy_levels = []
         self.class_weights = []
-        
+
         class_counts = {}
         for potential_level in attributes.diabetic_retinopathy_levels:
             class_counts[potential_level] = 0
@@ -58,23 +58,27 @@ class RetinalImageDataset(Dataset):
                     self.attr.level_to_id[row["level"]]
                 )
                 class_counts[row["level"]] += 1
-        
+
         total_samples = len(self.data)
         print(f"There are {total_samples} images")
         for count in class_counts:
             weight = 1 / (class_counts[count] / total_samples)
             self.class_weights.append(weight)
-            
 
     def __len__(self) -> int:
         return len(self.data)
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
-        img_path: str = f"{self.data[idx]}.jpg"
-        # img_path: str = f"{self.data[idx]}"
+        # img_path: str = f"{self.data[idx]}.jpg"
+        img_path: str = f"{self.data[idx]}"
         img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
+        img.save("image.bmp")
+
         if self.transform:
             img = self.transform(img)
+            img_to_save = F.to_pil_image(img)  # Convert tensor back to PIL
+            img_to_save.save("transformed.bmp")
+
         dict_data = {
             "img": img,
             "levels": self.diabetic_retinopathy_levels[idx],

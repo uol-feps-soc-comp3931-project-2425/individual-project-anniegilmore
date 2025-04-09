@@ -13,77 +13,48 @@ class DiabeticRetinopathyNet(nn.Module):
         for param in resnet50.parameters():
             param.requires_grad = False
         self.base_model = resnet50
-        last_channel = resnet50.fc.in_features
-        
+
         super(DiabeticRetinopathyNet, self).__init__()
-        
-        # Convolutional Layers
-        self.conv1 = nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1)
-        self.conv4 = nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, padding=1)
-        self.conv5 = nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1)
-        
-        # Max Pooling Layer
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
-        
-        # Fully Connected Layers
-        self.fc1 = nn.Linear(512 * 7 * 7, 4096)  # Assuming input images are 224x224
-        self.fc2 = nn.Linear(4096, n_diabetic_retinopathy_levels)
-        
-        # Dropout Layer
-        self.dropout = nn.Dropout(p=0.1)
-        
-        # self.pool = nn.AdaptiveAvgPool2d((1, 1))
-        # self.classifier = nn.Sequential(
-        #     nn.Conv2d(in_features=last_channel, out_features=64),
-        #     nn.ReLU(),
-        #     nn.Linear(in_features=64, out_features=128),
-        #     nn.ReLU(),
-        #     nn.Linear(in_features=128, out_features=256),
-        #     nn.ReLU(),
-        #     nn.Linear(in_features=256, out_features=512),
-        #     nn.ReLU(),
-        #     nn.Linear(in_features=512, out_features=512),
-        #     nn.ReLU(),
-        #     nn.Linear(in_features=512, out_features=4096),
-        #     nn.ReLU(),
-        #     # nn.Dropout(0.2),
-        #     nn.Linear(in_features=4096, out_features=n_diabetic_retinopathy_levels),
-        #     nn.Softmax(dim=1),
-        # )
+        self.block1 = nn.Sequential(
+            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        self.block2 = nn.Sequential(
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+        )
+
+        self.adaptive_pool = nn.AdaptiveAvgPool2d((56, 56))
+        self.flattened_tensor = nn.Flatten()
+
+        self.block3 = nn.Sequential(
+            nn.Linear(in_features=128 * 56 * 56, out_features=128),
+            nn.ReLU(),
+            nn.BatchNorm1d(num_features=128),
+            nn.Dropout(0.2),
+            nn.Linear(in_features=128, out_features=n_diabetic_retinopathy_levels),
+            nn.Softmax(dim=1),
+        )
+        self.gradients = None
+
+    def activations_hook(self, grad):
+        self.gradients = grad
 
     def forward(self, x: Any) -> dict[str, torch.Tensor]:
-        x = F.relu(self.conv1(x))
-        x = self.pool(x)
-        
-        x = F.relu(self.conv2(x))
-        x = self.pool(x)
-        
-        x = F.relu(self.conv3(x))
-        x = self.pool(x)
-        
-        x = F.relu(self.conv4(x))
-        x = self.pool(x)
-        
-        x = F.relu(self.conv5(x))
-        x = self.pool(x)
-        
-        # Flatten the output for the Fully Connected Layer
-        x = torch.flatten(x, start_dim=1)
-        x = F.relu(self.fc1(x))
-        x = self.dropout(x)
-        x = self.fc2(x)
-        
-        # Softmax Activation for Multi-Class Classification
-        return {"level": F.softmax(x, dim=1)}
-        
-        
-        # x = self.base_model(x)
-        # x = self.pool(x)
-        # x = torch.flatten(x, start_dim=1)
-        # return {"level": self.classifier(x)}
+        conv_output = self.block2(self.block1(x))
+        flat_output = self.flattened_tensor(conv_output)
+        linear_output = self.block3(flat_output)
+        return {"level": linear_output}
 
-    def get_loss(self, net_output: Any, ground_truth: torch.Tensor) -> torch.Tensor:
-        loss: torch.Tensor = F.cross_entropy(net_output["level"], ground_truth)
+    def get_loss(
+        self, net_output: torch.Tensor, ground_truth: torch.Tensor
+    ) -> torch.Tensor:
+        loss: torch.Tensor = F.cross_entropy(net_output, ground_truth)
         return loss
