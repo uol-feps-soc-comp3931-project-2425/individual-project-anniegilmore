@@ -7,15 +7,17 @@ import torch
 import torchvision.transforms as transforms
 from torchvision.transforms import v2
 from focal_loss import FocalLoss
+from early_stopping import EarlyStopping
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATASET_PATH, DATA_PATH, ITERATION, NUM_EPOCHS, START_EPOCH
 from hyperparameters import (
     BATCH_SIZE,
     LEARNING_RATE,
+    WEIGHT_DECAY,
     NUM_WORKERS,
     log_hyperparameters,
 )
-from image_dataset import AttributesDataset, RetinalImageDataset, mean, std
+from image_dataset import AttributesDataset, RetinalImageDataset
 from validate import calculate_metrics, validate, get_confusion_matrix
 from torch.optim import SGD
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -52,21 +54,16 @@ def save_checkpoint(model: DiabeticRetinopathyNet, epoch: int) -> None:
     )
     make_path(checkpoint_dir)
     checkpoint_path: Path = Path(f"{checkpoint_dir}/{checkpoint_name}")
-    torch.save(model, checkpoint_path)
+    torch.save(model.state_dict(), checkpoint_path)
     logger.info(f"Saved checkpoint: {checkpoint_path}")
 
 
-def image_transforms() -> v2.Compose:
+def train_transforms() -> v2.Compose:
     return v2.Compose(
         [
             v2.ToImage(),
-            v2.ToDtype(torch.uint8, scale=True),
             v2.Resize((224, 224), antialias=True),
-            v2.RandomHorizontalFlip(p=0.2),
-            # v2.RandomRotation(180),
             v2.ToDtype(torch.float32, scale=True),
-            # transforms.ToTensor(),
-            v2.Normalize(mean, std),
         ]
     )
 
@@ -77,7 +74,6 @@ def validation_transforms() -> v2.Compose:
             v2.ToImage(),
             v2.Resize((224, 224), antialias=True),
             v2.ToDtype(torch.float32, scale=True),
-            # v2.Normalize(mean, std),
         ]
     )
 
@@ -97,20 +93,19 @@ def run_epoch(
     model: DiabeticRetinopathyNet,
     optimizer: SGD,
     epoch: int,
+    device,
 ) -> tuple[dict[str, list], DiabeticRetinopathyNet, SGD]:
     current_loss: float = 0.0
     accuracy: float = 0.0
     class_weights: torch.FloatTensor = torch.FloatTensor(
         train_dataloader.dataset.class_weights
     )
-    # print(np.bincount(train_dataloader))
     n_train_samples: int = len(train_dataloader)
-    print(f"There are {n_train_samples} samples\n")
     y_predictions = []
     y_true_labels = []
     for batch_data in train_dataloader:
         current_loss, accuracy, y_pred, y_true = run_batch(
-            model, optimizer, current_loss, accuracy, batch_data, class_weights
+            model, optimizer, current_loss, accuracy, batch_data, class_weights, device
         )
         y_predictions.extend(y_pred)
         y_true_labels.extend(y_true)
@@ -132,16 +127,15 @@ def run_batch(
     accuracy: float,
     batch_data: Any,
     class_weights: torch.FloatTensor,
+    device,
 ) -> tuple[float, float]:
     inputs = batch_data["img"]
-    targets = batch_data["levels"].to(get_device())
+    targets = batch_data["levels"].to(device)
     optimizer.zero_grad()
-    output: dict[str, torch.Tensor] = model(inputs.to(get_device()))
-    predicted_labels = output["level"].argmax(dim=1).numpy()
+    output: dict[str, torch.Tensor] = model(inputs.to(device))
+    predicted_labels = output["level"].argmax(dim=1).detach().cpu().numpy()
     true_labels = targets.data.cpu().numpy()
-    accuracy += calculate_metrics(output["level"], targets)
-    # training_loss: torch.Tensor = F.cross_entropy(output["level"], targets)
-    # training_loss: torch.Tensor = model.get_loss(output["level"], targets)
+    accuracy += calculate_metrics(predicted_labels, batch_data["levels"])
     criterion = FocalLoss(alpha=class_weights, gamma=3)
     training_loss = criterion(output["level"], targets)
     training_loss.backward()
@@ -181,13 +175,15 @@ def plot_graph(
     plt.title(graph_title)
     plt.savefig(f"{graph_dir}/{graph_title}.jpeg")
     plt.clf()
+    plt.close()
 
 
 def setup_model(attributes: AttributesDataset) -> DiabeticRetinopathyNet:
+    device = get_device()
     model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
         n_diabetic_retinopathy_levels=attributes.num_classes
-    ).to(get_device())
-    return model
+    ).to(device)
+    return model, device
 
 
 def save_progress_graph(
@@ -214,29 +210,43 @@ def train_model() -> None:
         validation_transforms(), TRAINING_ANNOTATIONS_PATH
     )
     print(train_dataset.class_weights)
-    val_dataset, _ = setup_dataset(image_transforms(), VALIDATION_ANNOTATIONS_PATH)
+    val_dataset, _ = setup_dataset(validation_transforms(), VALIDATION_ANNOTATIONS_PATH)
+    print(val_dataset.class_weights)
     train_loader: DataLoader = setup_dataloader(train_dataset)
-    print(train_loader.dataset.class_weights)
     val_loader: DataLoader = setup_dataloader(val_dataset)
-    model_to_train: DiabeticRetinopathyNet = setup_model(attributes)
-    optimizer: SGD = SGD(model_to_train.parameters(), lr=LEARNING_RATE)
+    model_to_train, device = setup_model(attributes)
+    optimizer: SGD = SGD(
+        model_to_train.parameters(),
+        lr=LEARNING_RATE,
+        momentum=0.9,
+        weight_decay=WEIGHT_DECAY,
+    )
     scheduler: ReduceLROnPlateau = ReduceLROnPlateau(optimizer, "min")
     progress_tracker: dict[str, list] = get_progress_tracker()
+    early_stopping = EarlyStopping(patience=5)
     for epoch in tqdm(range(START_EPOCH, NUM_EPOCHS + 1)):
         model_to_train.train(True)
         progress_tracker, model_to_train, optimizer = run_epoch(
-            progress_tracker, train_loader, model_to_train, optimizer, epoch
+            progress_tracker, train_loader, model_to_train, optimizer, epoch, device
         )
         progress_tracker, _, val_loss = validate(
-            progress_tracker, model_to_train, val_loader, epoch
+            progress_tracker, model_to_train, val_loader, epoch, device
         )
+
         scheduler.step(val_loss)
         if epoch % SAVE_PROGRESS_INTERVAL == 0:
             save_progress_graph(progress_tracker, epoch)
             save_checkpoint(model_to_train, epoch)
+        early_stopping(val_loss)
+        if early_stopping.early_stop:
+            print(f"Early stopping triggered at epoch {epoch + 1}")
+            break
+        print(
+            f"Training accuracy: {progress_tracker['Train Accuracy']}, Validation accuracy: {progress_tracker['Validation Accuracy']}"
+        )
 
 
-def main() -> None:
+def training_process() -> None:
     logger.info(f"\n{ITERATION}")
     torch.manual_seed(42)
     start: float = time.time()
@@ -248,4 +258,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    print(f"Beginning training process for {ITERATION}")
+    training_process()

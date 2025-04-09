@@ -2,7 +2,7 @@ import csv
 from pathlib import Path
 from typing import Any
 
-import torchvision.transforms.functional as F
+
 import torchvision.transforms as transforms
 from PIL import Image
 from torch.utils.data import Dataset
@@ -13,13 +13,13 @@ mean = [0.485, 0.456, 0.406]
 std = [0.229, 0.224, 0.225]
 
 
-PATH_TO_IMAGES = Path(f"{DATASET_PATH}/processed_images")
+PATH_TO_IMAGES = Path(f"{DATASET_PATH}/images")
+PATH_TO_AUGMENTED_IMAGES = Path(f"{DATASET_PATH}/augmented_images")
 
 
 class AttributesDataset:
     def __init__(self) -> None:
         self.diabetic_retinopathy_levels = ["0", "1", "2", "3"]
-        # self.diabetic_retinopathy_levels = ["airplane", "cat", "deer"]
         self.num_classes = len(self.diabetic_retinopathy_levels)
 
         self.level_to_id = dict(
@@ -69,16 +69,19 @@ class RetinalImageDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx: int) -> dict[str, Any]:
-        # img_path: str = f"{self.data[idx]}.jpg"
         img_path: str = f"{self.data[idx]}"
-        img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
-        img.save("image.bmp")
-
+        if img_path.endswith("PP.tif"):
+            img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
+        elif img_path.endswith("flipped.tif"):
+            img: Image.Image = Image.open(
+                f"{PATH_TO_AUGMENTED_IMAGES}/flipped_images/{img_path}"
+            ).convert("RGB")
+        elif img_path.endswith("rotated.tif"):
+            img: Image.Image = Image.open(
+                f"{PATH_TO_AUGMENTED_IMAGES}/rotated_images/{img_path}"
+            ).convert("RGB")
         if self.transform:
             img = self.transform(img)
-            img_to_save = F.to_pil_image(img)  # Convert tensor back to PIL
-            img_to_save.save("transformed.bmp")
-
         dict_data = {
             "img": img,
             "levels": self.diabetic_retinopathy_levels[idx],

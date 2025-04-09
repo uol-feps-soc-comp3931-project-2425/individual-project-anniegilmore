@@ -6,15 +6,15 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
-import torch.nn.functional as F
 
 import torch
 import torchvision.transforms as transforms
+from focal_loss import FocalLoss
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATA_PATH, ITERATION
 from sklearn.metrics import balanced_accuracy_score
 from torch.utils.data import DataLoader
-from utils import get_device, make_path, setup_logger
+from utils import make_path, setup_logger
 
 logger = setup_logger(
     "validation", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
@@ -44,6 +44,7 @@ def get_confusion_matrix(y_true, y_pred, epoch, val) -> None:
     make_path(path_to_matrix)
     plt.savefig(f"{path_to_matrix}/{epoch}.png")
     plt.clf()
+    plt.close()
 
 
 def model_validation_data(
@@ -52,22 +53,26 @@ def model_validation_data(
     validation_loss: float,
     validation_accuracy: float,
     epoch: int,
+    device,
 ) -> tuple[float, float]:
     y_pred = []
     y_true = []
+    class_weights: torch.FloatTensor = torch.FloatTensor(
+        dataloader.dataset.class_weights
+    )
     for batch_data in dataloader:
         image_to_model = batch_data["img"]
-        target_scores = batch_data["levels"].to(get_device())
-        model_output = model(image_to_model.to(get_device()))
-        y_pred_labels = model_output["level"].argmax(dim=1).numpy()
+        target_scores = batch_data["levels"].to(device)
+        model_output = model(image_to_model.to(device))
+        y_pred_labels = model_output["level"].argmax(dim=1).detach().cpu().numpy()
 
         y_pred.extend(y_pred_labels)
         labels = target_scores.data.cpu().numpy()
         y_true.extend(labels)
-        # val_train = model.get_loss(model_output, target_scores)
-        val_train: torch.Tensor = F.cross_entropy(model_output["level"], target_scores)
-        validation_loss += val_train.item()
-        validation_accuracy += calculate_metrics(model_output["level"], target_scores)
+        criterion = FocalLoss(alpha=class_weights, gamma=3)
+        val_loss = criterion(model_output["level"], target_scores)
+        validation_loss += val_loss.item()
+        validation_accuracy += calculate_metrics(y_pred_labels, batch_data["levels"])
     average_loss = round(validation_loss / len(dataloader), 3)
     average_accuracy = round(100 * (validation_accuracy / len(dataloader)), 3)
     get_confusion_matrix(y_true, y_pred, epoch, True)
@@ -79,13 +84,14 @@ def validate(
     model: DiabeticRetinopathyNet,
     dataloader: DataLoader,
     epoch: int,
+    device,
 ) -> tuple[dict[str, list], float, float]:
     model.eval()
     with torch.no_grad():
         validation_loss: float = 0.0
         validation_accuracy: float = 0.0
         validation_loss, validation_accuracy = model_validation_data(
-            dataloader, model, validation_loss, validation_accuracy, epoch
+            dataloader, model, validation_loss, validation_accuracy, epoch, device
         )
     progress_tracker["Validation Loss"].append(validation_loss)
     progress_tracker["Validation Accuracy"].append(validation_accuracy)
@@ -96,16 +102,11 @@ def validate(
 
 
 def calculate_metrics(output: Any, target: Any) -> float:
-    _, predicted_score = torch.max(output, 1)
-    target_score = target.cpu()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        accuracy = balanced_accuracy_score(
-            y_true=target_score.numpy(), y_pred=predicted_score.numpy()
-        )
+        accuracy = balanced_accuracy_score(y_true=target, y_pred=output)
     return accuracy
 
 
 def validation_transforms() -> transforms.Compose:
-    # return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
     return transforms.Compose([transforms.ToTensor()])

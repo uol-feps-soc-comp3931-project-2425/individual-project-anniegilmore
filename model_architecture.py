@@ -9,49 +9,55 @@ import torchvision.models as models
 class DiabeticRetinopathyNet(nn.Module):
     def __init__(self, n_diabetic_retinopathy_levels: int) -> None:
         super().__init__()
-        resnet50 = models.resnet50()
-        for param in resnet50.parameters():
-            param.requires_grad = False
-        self.base_model = resnet50
+        resnet50 = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+        for name, param in resnet50.named_parameters():
+            if "layer_4" in name or "fc" in name:
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
 
-        super(DiabeticRetinopathyNet, self).__init__()
-        self.block1 = nn.Sequential(
-            nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, padding=1),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+        self.base_model = nn.Sequential(
+            resnet50.conv1,
+            resnet50.bn1,
+            resnet50.relu,
+            resnet50.maxpool,
+            resnet50.layer1,
+            resnet50.layer2,
+            resnet50.layer3,
+            resnet50.layer4,
         )
 
-        self.block2 = nn.Sequential(
+        self.conv_head = nn.Sequential(
+            nn.Conv2d(in_channels=2048, out_channels=32, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.2),
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
             nn.ReLU(),
+            nn.Dropout(0.2),
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.AdaptiveAvgPool2d((56, 56)),
         )
 
-        self.adaptive_pool = nn.AdaptiveAvgPool2d((56, 56))
-        self.flattened_tensor = nn.Flatten()
-
-        self.block3 = nn.Sequential(
+        self.classifier = nn.Sequential(
+            nn.Flatten(),
             nn.Linear(in_features=128 * 56 * 56, out_features=128),
             nn.ReLU(),
             nn.BatchNorm1d(num_features=128),
-            nn.Dropout(0.2),
+            nn.Dropout(0.5),
             nn.Linear(in_features=128, out_features=n_diabetic_retinopathy_levels),
-            nn.Softmax(dim=1),
         )
-        self.gradients = None
 
     def activations_hook(self, grad):
         self.gradients = grad
 
     def forward(self, x: Any) -> dict[str, torch.Tensor]:
-        conv_output = self.block2(self.block1(x))
-        flat_output = self.flattened_tensor(conv_output)
-        linear_output = self.block3(flat_output)
-        return {"level": linear_output}
+        x = self.base_model(x)
+        x = self.conv_head(x)
+        x = self.classifier(x)
+        return {"level": x}
 
     def get_loss(
         self, net_output: torch.Tensor, ground_truth: torch.Tensor

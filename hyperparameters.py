@@ -5,32 +5,37 @@ from utils import setup_logger
 
 BATCH_SIZE = 64
 NUM_WORKERS = 4
-LEARNING_RATE = 0.01
-DROPOUT = 0.2
+LEARNING_RATE = 0.0001
+WEIGHT_DECAY = 0.0001
+DROPOUT = 0.5
 CLASSIFIER_STRUCT = """
-            nn.Conv2d(in_features=last_channel, out_features=32),
-            nn.ReLU(),
-            nn.Conv2d(in_features=32, out_features=32),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
+            Resnet pretrained = True
+            self.conv_head = nn.Sequential(
+                nn.Conv2d(in_channels=2048, out_channels=32, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.Dropout(0.2),
+                nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.Dropout(0.2),
+                nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2),
+                nn.AdaptiveAvgPool2d((56, 56)),
+            )
 
-            nn.Conv2d(in_features=32, out_features=64),
-            nn.ReLU(),
-            nn.Conv2d(in_features=64, out_features=128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
-            nn.Flatten(),
-            nn.Linear(in_features=128, out_features=128),
-            nn.ReLU(),
-            nn.BatchNorm2d(),
-            nn.Dropout(0.1),
-            nn.Linear(in_features=128, out_features=n_diabetic_retinopathy_levels),
-
-            nn.Softmax(dim=1),"""
+            self.classifier = nn.Sequential(
+                nn.Flatten(),
+                nn.Linear(in_features=128 *56 *56, out_features=128),
+                nn.ReLU(),
+                nn.BatchNorm1d(num_features=128),
+                nn.Dropout(0.5),
+                nn.Linear(in_features=128, out_features=n_diabetic_retinopathy_levels),
+            )
+            """
 
 EXTRA_INFO = """
-Dropout increased from 0.1 to 0.2
+inter level dropout increased
 """
 
 
