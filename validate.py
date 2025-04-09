@@ -6,13 +6,12 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
+import torch.nn.functional as F
 
 import torch
 import torchvision.transforms as transforms
-from focal_loss import FocalLoss
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATA_PATH, ITERATION
-from image_dataset import mean, std
 from sklearn.metrics import balanced_accuracy_score
 from torch.utils.data import DataLoader
 from utils import get_device, make_path, setup_logger
@@ -21,17 +20,30 @@ logger = setup_logger(
     "validation", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
 )
 
-def get_confusion_matrix(y_true, y_pred, epoch) -> None:
-    classes = ('0', '1', '2')
+
+def get_confusion_matrix(y_true, y_pred, epoch, val) -> None:
+    classes = ("0", "1", "2", "3")
 
     # Build confusion matrix
     cf_matrix = confusion_matrix(y_true, y_pred)
-    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index = [i for i in classes],
-                        columns = [i for i in classes])
-    plt.figure(figsize = (12,7))
+    df_cm = pd.DataFrame(
+        cf_matrix / np.sum(cf_matrix, axis=1)[:, None],
+        index=[i for i in classes],
+        columns=[i for i in classes],
+    )
+    plt.figure(figsize=(12, 7))
     sn.heatmap(df_cm, annot=True)
-    make_path(Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix"))
-    plt.savefig(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/{epoch}.png")
+    if val:
+        path_to_matrix = Path(
+            f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/validation"
+        )
+    else:
+        path_to_matrix = Path(
+            f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/train"
+        )
+    make_path(path_to_matrix)
+    plt.savefig(f"{path_to_matrix}/{epoch}.png")
+    plt.clf()
 
 
 def model_validation_data(
@@ -47,16 +59,18 @@ def model_validation_data(
         image_to_model = batch_data["img"]
         target_scores = batch_data["levels"].to(get_device())
         model_output = model(image_to_model.to(get_device()))
-        y_pred_labels = model_output.argmax(dim=1).numpy()
+        y_pred_labels = model_output["level"].argmax(dim=1).numpy()
+
         y_pred.extend(y_pred_labels)
         labels = target_scores.data.cpu().numpy()
         y_true.extend(labels)
         # val_train = model.get_loss(model_output, target_scores)
-        validation_loss += 0
-        validation_accuracy += calculate_metrics(model_output, target_scores)
+        val_train: torch.Tensor = F.cross_entropy(model_output["level"], target_scores)
+        validation_loss += val_train.item()
+        validation_accuracy += calculate_metrics(model_output["level"], target_scores)
     average_loss = round(validation_loss / len(dataloader), 3)
     average_accuracy = round(100 * (validation_accuracy / len(dataloader)), 3)
-    # get_confusion_matrix(y_true, y_pred, epoch)
+    get_confusion_matrix(y_true, y_pred, epoch, True)
     return average_loss, average_accuracy
 
 
@@ -84,9 +98,7 @@ def validate(
 def calculate_metrics(output: Any, target: Any) -> float:
     _, predicted_score = torch.max(output, 1)
     target_score = target.cpu()
-    with (
-        warnings.catch_warnings()
-    ):
+    with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         accuracy = balanced_accuracy_score(
             y_true=target_score.numpy(), y_pred=predicted_score.numpy()
@@ -95,4 +107,5 @@ def calculate_metrics(output: Any, target: Any) -> float:
 
 
 def validation_transforms() -> transforms.Compose:
-    return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+    # return transforms.Compose([transforms.ToTensor(), transforms.Normalize(mean, std)])
+    return transforms.Compose([transforms.ToTensor()])

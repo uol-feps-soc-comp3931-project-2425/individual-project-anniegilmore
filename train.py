@@ -1,14 +1,12 @@
 import time
 from pathlib import Path
 from typing import Any
-import torch.nn.functional as F
 
 import matplotlib.pyplot as plt
 import torch
 import torchvision.transforms as transforms
+from torchvision.transforms import v2
 from focal_loss import FocalLoss
-import torchvision.models as models
-import torch.nn as nn
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATASET_PATH, DATA_PATH, ITERATION, NUM_EPOCHS, START_EPOCH
 from hyperparameters import (
@@ -19,8 +17,8 @@ from hyperparameters import (
 )
 from image_dataset import AttributesDataset, RetinalImageDataset, mean, std
 from validate import calculate_metrics, validate, get_confusion_matrix
-from torch.optim import Adam
-from torch.optim.lr_scheduler import StepLR
+from torch.optim import SGD
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from utils import get_device, make_path, setup_logger
@@ -31,7 +29,7 @@ GRAPH_PATH = f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/graphs"
 TRAINING_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/trainLabels.csv")
 VALIDATION_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/validateLabels.csv")
 
-SAVE_PROGRESS_INTERVAL = 2
+SAVE_PROGRESS_INTERVAL = 5
 
 logger = setup_logger(
     "train", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
@@ -47,24 +45,39 @@ def get_progress_tracker() -> dict[str, list]:
     }
 
 
-def save_checkpoint(
-    model: DiabeticRetinopathyNet,
-    epoch: int
-) -> None:
+def save_checkpoint(model: DiabeticRetinopathyNet, epoch: int) -> None:
     checkpoint_name: str = f"checkpoint-epoch-{epoch}.pth"
-    checkpoint_dir: Path = Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/checkpoints")
+    checkpoint_dir: Path = Path(
+        f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/checkpoints"
+    )
     make_path(checkpoint_dir)
     checkpoint_path: Path = Path(f"{checkpoint_dir}/{checkpoint_name}")
     torch.save(model, checkpoint_path)
     logger.info(f"Saved checkpoint: {checkpoint_path}")
 
 
-def image_transforms() -> transforms.Compose:
-    return transforms.Compose(
+def image_transforms() -> v2.Compose:
+    return v2.Compose(
         [
-            transforms.Resize((198, 198)),
-            transforms.ToTensor(),
-            transforms.Normalize(mean, std),
+            v2.ToImage(),
+            v2.ToDtype(torch.uint8, scale=True),
+            v2.Resize((224, 224), antialias=True),
+            v2.RandomHorizontalFlip(p=0.2),
+            # v2.RandomRotation(180),
+            v2.ToDtype(torch.float32, scale=True),
+            # transforms.ToTensor(),
+            v2.Normalize(mean, std),
+        ]
+    )
+
+
+def validation_transforms() -> v2.Compose:
+    return v2.Compose(
+        [
+            v2.ToImage(),
+            v2.Resize((224, 224), antialias=True),
+            v2.ToDtype(torch.float32, scale=True),
+            # v2.Normalize(mean, std),
         ]
     )
 
@@ -82,12 +95,14 @@ def run_epoch(
     progress_tracker: dict[str, list],
     train_dataloader: DataLoader,
     model: DiabeticRetinopathyNet,
-    optimizer: Adam,
+    optimizer: SGD,
     epoch: int,
-) -> tuple[dict[str, list], DiabeticRetinopathyNet, Adam]:
+) -> tuple[dict[str, list], DiabeticRetinopathyNet, SGD]:
     current_loss: float = 0.0
     accuracy: float = 0.0
-    class_weights: torch.FloatTensor = torch.FloatTensor(train_dataloader.dataset.class_weights)
+    class_weights: torch.FloatTensor = torch.FloatTensor(
+        train_dataloader.dataset.class_weights
+    )
     # print(np.bincount(train_dataloader))
     n_train_samples: int = len(train_dataloader)
     print(f"There are {n_train_samples} samples\n")
@@ -99,7 +114,7 @@ def run_epoch(
         )
         y_predictions.extend(y_pred)
         y_true_labels.extend(y_true)
-    get_confusion_matrix(y_true_labels, y_predictions, epoch)
+    get_confusion_matrix(y_true_labels, y_predictions, epoch, False)
     total_training_loss: float = round((current_loss / n_train_samples), 3)
     total_training_accuracy: float = round(100 * (accuracy / n_train_samples), 3)
     progress_tracker["Train Loss"].append(total_training_loss)
@@ -112,7 +127,7 @@ def run_epoch(
 
 def run_batch(
     model: DiabeticRetinopathyNet,
-    optimizer: Adam,
+    optimizer: SGD,
     current_loss: float,
     accuracy: float,
     batch_data: Any,
@@ -122,13 +137,13 @@ def run_batch(
     targets = batch_data["levels"].to(get_device())
     optimizer.zero_grad()
     output: dict[str, torch.Tensor] = model(inputs.to(get_device()))
-    predicted_labels = output.argmax(dim=1).numpy()
+    predicted_labels = output["level"].argmax(dim=1).numpy()
     true_labels = targets.data.cpu().numpy()
-    accuracy += calculate_metrics(output, targets)
-    training_loss: torch.Tensor = F.cross_entropy(output, targets)
-    # training_loss: torch.Tensor = model.get_loss(output, targets)
-    # criterion = FocalLoss(alpha=class_weights, gamma=3)
-    # training_loss = criterion(output, targets)
+    accuracy += calculate_metrics(output["level"], targets)
+    # training_loss: torch.Tensor = F.cross_entropy(output["level"], targets)
+    # training_loss: torch.Tensor = model.get_loss(output["level"], targets)
+    criterion = FocalLoss(alpha=class_weights, gamma=3)
+    training_loss = criterion(output["level"], targets)
     training_loss.backward()
     optimizer.step()
     current_loss += training_loss.item()
@@ -169,15 +184,9 @@ def plot_graph(
 
 
 def setup_model(attributes: AttributesDataset) -> DiabeticRetinopathyNet:
-    # model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
-    #     n_diabetic_retinopathy_levels=attributes.num_classes
-    # ).to(get_device())
-    resnet50 = models.resnet50()
-    for param in resnet50.parameters():
-        param.requires_grad = False
-    last_channel = resnet50.fc.in_features
-    resnet50.fc = nn.Linear(last_channel, 3)
-    model = resnet50.to(get_device())
+    model: DiabeticRetinopathyNet = DiabeticRetinopathyNet(
+        n_diabetic_retinopathy_levels=attributes.num_classes
+    ).to(get_device())
     return model
 
 
@@ -198,11 +207,11 @@ def save_progress_graph(
             x_axis,
             graph_dir,
         )
-    
+
 
 def train_model() -> None:
     train_dataset, attributes = setup_dataset(
-        image_transforms(), TRAINING_ANNOTATIONS_PATH
+        validation_transforms(), TRAINING_ANNOTATIONS_PATH
     )
     print(train_dataset.class_weights)
     val_dataset, _ = setup_dataset(image_transforms(), VALIDATION_ANNOTATIONS_PATH)
@@ -210,8 +219,8 @@ def train_model() -> None:
     print(train_loader.dataset.class_weights)
     val_loader: DataLoader = setup_dataloader(val_dataset)
     model_to_train: DiabeticRetinopathyNet = setup_model(attributes)
-    optimizer: Adam = Adam(model_to_train.parameters(), lr=LEARNING_RATE)
-    scheduler: StepLR = StepLR(optimizer, step_size=10, gamma=0.1)
+    optimizer: SGD = SGD(model_to_train.parameters(), lr=LEARNING_RATE)
+    scheduler: ReduceLROnPlateau = ReduceLROnPlateau(optimizer, "min")
     progress_tracker: dict[str, list] = get_progress_tracker()
     for epoch in tqdm(range(START_EPOCH, NUM_EPOCHS + 1)):
         model_to_train.train(True)
@@ -221,7 +230,7 @@ def train_model() -> None:
         progress_tracker, _, val_loss = validate(
             progress_tracker, model_to_train, val_loader, epoch
         )
-        scheduler.step()
+        scheduler.step(val_loss)
         if epoch % SAVE_PROGRESS_INTERVAL == 0:
             save_progress_graph(progress_tracker, epoch)
             save_checkpoint(model_to_train, epoch)
