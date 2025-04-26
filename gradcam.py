@@ -31,10 +31,10 @@ class GradCAM:
         output = self.model(input_tensor)
 
         if class_idx is None:
-            class_idx = output.argmax(dim=1).item()
+            class_idx = output['level'].argmax(dim=1).item()
 
         self.model.zero_grad()
-        output[0, class_idx].backward()
+        output['level'][0, class_idx].backward()
 
         grads = self.gradients
         acts = self.activations
@@ -53,10 +53,12 @@ class GradCAM:
         if isinstance(original_img, torch.Tensor):
             original_img = original_img.squeeze().permute(1, 2, 0).cpu().numpy()
             original_img = np.uint8(255 * original_img)
+            
+        original_np = np.array(original_img)
 
-        heatmap_resized = cv2.resize(heatmap, (original_img.shape[1], original_img.shape[0]))
+        heatmap_resized = cv2.resize(heatmap, (original_np.shape[1], original_np.shape[0]))
         heatmap_colored = cv2.applyColorMap(np.uint8(255 * heatmap_resized), cv2.COLORMAP_JET)
-        superimposed = np.uint8(0.4 * heatmap_colored + 0.6 * original_img)
+        superimposed = np.uint8(0.4 * heatmap_colored + 0.6 * original_np)
 
         return superimposed
 

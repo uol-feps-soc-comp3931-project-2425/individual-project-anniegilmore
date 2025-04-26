@@ -5,19 +5,32 @@ import random
 import numpy as np
 from tqdm import tqdm
 import cv2
-from standardise_dataset import get_level_distribution_map
 
 import warnings
 warnings.filterwarnings("ignore")
 
-# DATASET_PATH = Path("../messidor-1/dataset_0.8")
-# DATASET_PATH = Path("../messidor-1/dataset_0.8/test_dataset")
-DATASET_PATH = Path("../messidor-1/dataset_0.7")
+DATASET_PATH = Path("dataset")
 TRAINING_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/trainLabels.csv")
 
 GEOMETRIC_AUGS = ["hflip", "vflip", "rotate", "zoom"]
 PHOTOMETRIC_AUGS = ["saturation", "contrast", "brightness"]
 POTENTIAL_AUGMENTATIONS = ["hflip", "vflip", "noise", "rotate", "zoom", "saturation", "contrast", "brightness"]
+
+
+def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
+    level_image_map: dict[str, list[str]] = {
+        "0": [],
+        "1": [],
+        "2": [],
+        "3": [],
+    }
+    with open(path_to_dataset, "r", newline="") as csvfile:
+        dataset_reader = csv.reader(csvfile, delimiter=",")
+        for rows in dataset_reader:
+            for level in level_image_map.keys():
+                if rows[1] == level:
+                    level_image_map[level].append(rows[0])
+    return level_image_map
 
 def zoom(img, angle=0, coord=None):
     zoom: int = 1
@@ -132,16 +145,22 @@ def get_augs() -> list[str]:
     return augs_to_apply
     
                     
-def supplementary_augmentations() -> None:
+def supplementary_augmentations(level: int) -> None:
     distribution_map = get_level_distribution_map(TRAINING_ANNOTATIONS_PATH)
-    print(f"There are {len(distribution_map['0'])} images of level 0")
-    for level in ['0']:
+    print(f"There are {len(distribution_map[str(level)])} images of level {str(level)}")
+    for level in [str(level)]:
         num_images_in_level = len(distribution_map[level])
         num_supplementary_augmentations = 2500 - num_images_in_level
         num_augs_fulfilled = 0
         while num_augs_fulfilled < num_supplementary_augmentations:
             image = random.choice(distribution_map[level])
-            img = cv2.imread(f"{DATASET_PATH}/processed_images/{image}")
+            if image.endswith("PP.tif"):
+                img = cv2.imread(f"{DATASET_PATH}/images/{image}")
+                if img is None:
+                    print(image)
+                    continue
+            else:
+                continue
             augs_to_apply = get_augs()
             distorted_image = apply_augmentations(augs_to_apply, img)
             distortion_string = "_".join(augs_to_apply)
@@ -156,7 +175,7 @@ def supplementary_augmentations() -> None:
                 writer.writerow(row)
             num_augs_fulfilled += 1
     distribution_map = get_level_distribution_map(TRAINING_ANNOTATIONS_PATH)
-    print(f"There are {len(distribution_map['0'])} images of level 0")
+    print(f"There are {len(distribution_map[str(level)])} images of level {str(level)}")
             
 
 

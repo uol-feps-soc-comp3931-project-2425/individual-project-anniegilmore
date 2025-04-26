@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-ITERATION = "Iteration 45"
+ITERATION = "Iteration 60"
 DATA_PATH = "training_resources/"
 MODEL_NAME = "Diabetic Retinopathy Diagnosis"
 NUM_EPOCHS = 30
