@@ -13,7 +13,7 @@ CLASSIFIER_STRUCT = """
             resnet50.fc = nn.Linear(num_features, n_diabetic_retinopathy_levels)
             self.transfer_model = resnet50
             """
-            
+
 EXTRA_INFO = """
 attempt to go back to it, 51 -> only using resnet layer 4 and fc
 """
@@ -22,9 +22,7 @@ attempt to go back to it, 51 -> only using resnet layer 4 and fc
 def log_hyperparameters() -> None:
     hyperparameter_logger = setup_logger(
         "hyperparameters",
-        Path(
-            f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/hyperparameters.log"
-        ),
+        Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/hyperparameters.log"),
     )
     hyperparameter_logger.info("Hyperparameter details")
     hyperparameter_logger.info(f"Batch size: {BATCH_SIZE}")

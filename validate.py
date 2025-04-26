@@ -6,34 +6,40 @@ import numpy as np
 from sklearn.metrics import confusion_matrix
 import seaborn as sn
 import pandas as pd
-import torch.nn.functional as F
 
 import torch
-import torchvision.transforms as transforms
 from focal_loss import FocalLoss
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATA_PATH, ITERATION
 from sklearn.metrics import balanced_accuracy_score
 from torch.utils.data import DataLoader
-from utils import get_device, make_path, setup_logger
+from utils import make_path, setup_logger
 
 logger = setup_logger(
     "validation", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
 )
 
+
 def get_confusion_matrix(y_true, y_pred, epoch, val) -> None:
-    classes = ('0', '1', '2', '3')
+    classes = ("0", "1", "2", "3")
 
     # Build confusion matrix
     cf_matrix = confusion_matrix(y_true, y_pred)
-    df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix, axis=1)[:, None], index = [i for i in classes],
-                        columns = [i for i in classes])
-    plt.figure(figsize = (12,7))
+    df_cm = pd.DataFrame(
+        cf_matrix / np.sum(cf_matrix, axis=1)[:, None],
+        index=[i for i in classes],
+        columns=[i for i in classes],
+    )
+    plt.figure(figsize=(12, 7))
     sn.heatmap(df_cm, annot=True)
     if val:
-        path_to_matrix = Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/validation")
+        path_to_matrix = Path(
+            f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/validation"
+        )
     else:
-        path_to_matrix = Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/train")
+        path_to_matrix = Path(
+            f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/confusion_matrix/train"
+        )
     make_path(path_to_matrix)
     plt.savefig(f"{path_to_matrix}/{epoch}.png")
     plt.clf()
@@ -50,13 +56,15 @@ def model_validation_data(
 ) -> tuple[float, float]:
     y_pred = []
     y_true = []
-    class_weights: torch.FloatTensor = torch.FloatTensor(dataloader.dataset.class_weights)
+    class_weights: torch.FloatTensor = torch.FloatTensor(
+        dataloader.dataset.class_weights
+    )
     for batch_data in dataloader:
         image_to_model = batch_data["img"]
         target_scores = batch_data["levels"].to(device)
         model_output = model(image_to_model.to(device))
         y_pred_labels = model_output["level"].argmax(dim=1).detach().cpu().numpy()
-        
+
         y_pred.extend(y_pred_labels)
         labels = target_scores.data.cpu().numpy()
         y_true.extend(labels)
@@ -93,11 +101,7 @@ def validate(
 
 
 def calculate_metrics(output: Any, target: Any) -> float:
-    with (
-        warnings.catch_warnings()
-    ):
+    with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        accuracy = balanced_accuracy_score(
-            y_true=target, y_pred=output
-        )
+        accuracy = balanced_accuracy_score(y_true=target, y_pred=output)
     return accuracy

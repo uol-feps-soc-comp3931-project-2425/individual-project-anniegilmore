@@ -1,7 +1,6 @@
 import time
 from pathlib import Path
 from typing import Any
-import torch.nn.functional as F
 
 import matplotlib.pyplot as plt
 import torch
@@ -9,8 +8,6 @@ import torchvision.transforms as transforms
 from torchvision.transforms import v2
 from focal_loss import FocalLoss
 from early_stopping import EarlyStopping
-import torchvision.models as models
-import torch.nn as nn
 from model_architecture import DiabeticRetinopathyNet
 from constants import DATASET_PATH, DATA_PATH, ITERATION, NUM_EPOCHS, START_EPOCH
 from hyperparameters import (
@@ -22,7 +19,7 @@ from hyperparameters import (
 )
 from image_dataset import AttributesDataset, RetinalImageDataset
 from validate import calculate_metrics, validate, get_confusion_matrix
-from torch.optim import SGD, Adam
+from torch.optim import SGD
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -53,12 +50,11 @@ def get_progress_tracker() -> dict[str, list]:
     }
 
 
-def save_checkpoint(
-    model: DiabeticRetinopathyNet,
-    epoch: int
-) -> None:
+def save_checkpoint(model: DiabeticRetinopathyNet, epoch: int) -> None:
     checkpoint_name: str = f"checkpoint-epoch-{epoch}.pth"
-    checkpoint_dir: Path = Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/checkpoints")
+    checkpoint_dir: Path = Path(
+        f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/checkpoints"
+    )
     make_path(checkpoint_dir)
     checkpoint_path: Path = checkpoint_dir / checkpoint_name
     try:
@@ -66,6 +62,7 @@ def save_checkpoint(
         logger.info(f"Saved checkpoint: {checkpoint_path}")
     except Exception as e:
         print(f"Failed to save model: {e}")
+
 
 def validation_transforms() -> v2.Compose:
     return v2.Compose(
@@ -97,7 +94,9 @@ def run_epoch(
 ) -> tuple[dict[str, list], DiabeticRetinopathyNet, SGD]:
     current_loss: float = 0.0
     accuracy: float = 0.0
-    class_weights: torch.FloatTensor = torch.FloatTensor(train_dataloader.dataset.class_weights)
+    class_weights: torch.FloatTensor = torch.FloatTensor(
+        train_dataloader.dataset.class_weights
+    )
     n_train_samples: int = len(train_dataloader)
     y_predictions = []
     y_true_labels = []
@@ -201,7 +200,7 @@ def save_progress_graph(
             x_axis,
             graph_dir,
         )
-    
+
 
 def train_model() -> None:
     train_dataset, attributes = setup_dataset(
@@ -213,8 +212,13 @@ def train_model() -> None:
     train_loader: DataLoader = setup_dataloader(train_dataset)
     val_loader: DataLoader = setup_dataloader(val_dataset)
     model_to_train, device = setup_model(attributes)
-    optimizer: SGD = SGD(model_to_train.parameters(), lr=LEARNING_RATE, momentum=0.9, weight_decay=WEIGHT_DECAY)
-    scheduler: ReduceLROnPlateau = ReduceLROnPlateau(optimizer, 'min')
+    optimizer: SGD = SGD(
+        model_to_train.parameters(),
+        lr=LEARNING_RATE,
+        momentum=0.9,
+        weight_decay=WEIGHT_DECAY,
+    )
+    scheduler: ReduceLROnPlateau = ReduceLROnPlateau(optimizer, "min")
     progress_tracker: dict[str, list] = get_progress_tracker()
     early_stopping = EarlyStopping(patience=15)
     for epoch in tqdm(range(START_EPOCH, NUM_EPOCHS + 1)):
@@ -225,14 +229,14 @@ def train_model() -> None:
         progress_tracker, _, val_loss = validate(
             progress_tracker, model_to_train, val_loader, epoch, device
         )
-        
+
         scheduler.step(val_loss)
         if epoch % SAVE_PROGRESS_INTERVAL == 0:
             save_progress_graph(progress_tracker, epoch)
             save_checkpoint(model_to_train, epoch)
         early_stopping(val_loss)
         if early_stopping.early_stop:
-            print(f"Early stopping triggered at epoch {epoch+1}")
+            print(f"Early stopping triggered at epoch {epoch + 1}")
             break
 
 

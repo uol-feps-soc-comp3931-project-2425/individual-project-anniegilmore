@@ -75,9 +75,8 @@ def standardize_dataset(path_to_dataset: Path) -> str:
         dict_writer.writerows(dict_to_write)
     return path_to_labels
 
-def split_data(
-    original_annotations: Path, data_to_split: list[str]
-) -> None:
+
+def split_data(original_annotations: Path, data_to_split: list[str]) -> None:
     new_dataset_path: str = f"{BASE_PATH}/dataset_0.7"
     make_path(Path(new_dataset_path))
     make_path(Path(f"{new_dataset_path}/images"))
@@ -197,32 +196,34 @@ def reduce_dataset(
             count += 1
     return new_image_map
 
+
 def choose_validation_images(percentage_train: float) -> None:
     # level_dist_map = get_level_distribution_map(OG_ANNOTATIONS_PATH)
     print(os.listdir("../aptos-2019-dataset"))
-    level_dist_map = get_level_distribution_map("../aptos-2019-dataset/whole_dataset.csv")
+    level_dist_map = get_level_distribution_map(
+        "../aptos-2019-dataset/whole_dataset.csv"
+    )
     # with open(OG_ANNOTATIONS_PATH, "r", newline="") as file:
     #     annotations: csv.DictReader[str] = csv.DictReader(file)
     #     for row in annotations:
     #         if f"{row['image']}.jpg" in moved_images:
     #             write_csv_rows(annotations_file, row)
     # print(level_dist_map)
-    
+
     total_images = 0
     for level in level_dist_map:
         total_images += len(level_dist_map[level])
     num_val_images = (1 - percentage_train) * total_images
     print(f"We need {num_val_images} val images")
-    
+
     print(f"There are {len(level_dist_map['0'])} images with label 0")
     print(f"There are {len(level_dist_map['1'])} images with label 1")
     print(f"There are {len(level_dist_map['2'])} images with label 2")
     print(f"There are {len(level_dist_map['3'])} images with label 3")
     print(f"There are {len(level_dist_map['4'])} images with label 4")
-    
+
     num_images_one_class = num_val_images / 4
     print(num_images_one_class)
-
 
 
 if __name__ == "__main__":
@@ -243,5 +244,5 @@ if __name__ == "__main__":
             dataset_reader = csv.reader(csvfile, delimiter=",")
             data: list[str] = [f"{row[0]}" for row in dataset_reader]
             del data[0]
-            
+
     split_data(Path(path_to_labels), data)

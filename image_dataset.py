@@ -18,7 +18,6 @@ PATH_TO_SUPPLEMENTED_IMAGES = Path(f"{DATASET_PATH}/supplemented")
 
 class AttributesDataset:
     def __init__(self) -> None:
-
         self.diabetic_retinopathy_levels = ["0", "1", "2", "3"]
         # self.diabetic_retinopathy_levels = ["airplane", "cat", "deer"]
         self.num_classes = len(self.diabetic_retinopathy_levels)
@@ -46,7 +45,7 @@ class RetinalImageDataset(Dataset):
         self.data = []
         self.diabetic_retinopathy_levels = []
         self.class_weights = []
-        
+
         class_counts = {}
         for potential_level in attributes.diabetic_retinopathy_levels:
             class_counts[potential_level] = 0
@@ -59,13 +58,12 @@ class RetinalImageDataset(Dataset):
                     self.attr.level_to_id[row["level"]]
                 )
                 class_counts[row["level"]] += 1
-        
+
         total_samples = len(self.data)
         print(f"There are {total_samples} images")
         for count in class_counts:
             weight = 1 / (class_counts[count] / total_samples)
             self.class_weights.append(weight)
-            
 
     def __len__(self) -> int:
         return len(self.data)
@@ -75,7 +73,9 @@ class RetinalImageDataset(Dataset):
         if img_path.endswith("PP.tif"):
             img: Image.Image = Image.open(f"{PATH_TO_IMAGES}/{img_path}").convert("RGB")
         else:
-            img: Image.Image = Image.open(f"{PATH_TO_SUPPLEMENTED_IMAGES}/{img_path}").convert("RGB")
+            img: Image.Image = Image.open(
+                f"{PATH_TO_SUPPLEMENTED_IMAGES}/{img_path}"
+            ).convert("RGB")
         if img is None:
             print(img_path)
         if self.transform:

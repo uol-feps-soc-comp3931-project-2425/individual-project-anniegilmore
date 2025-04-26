@@ -7,6 +7,7 @@ from tqdm import tqdm
 import cv2
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
 DATASET_PATH = Path("dataset")
@@ -14,7 +15,16 @@ TRAINING_ANNOTATIONS_PATH = Path(f"{DATASET_PATH}/trainLabels.csv")
 
 GEOMETRIC_AUGS = ["hflip", "vflip", "rotate", "zoom"]
 PHOTOMETRIC_AUGS = ["saturation", "contrast", "brightness"]
-POTENTIAL_AUGMENTATIONS = ["hflip", "vflip", "noise", "rotate", "zoom", "saturation", "contrast", "brightness"]
+POTENTIAL_AUGMENTATIONS = [
+    "hflip",
+    "vflip",
+    "noise",
+    "rotate",
+    "zoom",
+    "saturation",
+    "contrast",
+    "brightness",
+]
 
 
 def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
@@ -32,14 +42,16 @@ def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
                     level_image_map[level].append(rows[0])
     return level_image_map
 
+
 def zoom(img, angle=0, coord=None):
     zoom: int = 1
     while zoom == 1:
         zoom = random.uniform(0.9, 1.1)
-    cy, cx = [ i/2 for i in img.shape[:-1] ] if coord is None else coord[::-1]
-    rot_mat = cv2.getRotationMatrix2D((cx,cy), angle, zoom)
+    cy, cx = [i / 2 for i in img.shape[:-1]] if coord is None else coord[::-1]
+    rot_mat = cv2.getRotationMatrix2D((cx, cy), angle, zoom)
     result = cv2.warpAffine(img, rot_mat, img.shape[1::-1], flags=cv2.INTER_LINEAR)
     return result
+
 
 def adjust_contrast(image):
     new_contrast: int = 1
@@ -47,7 +59,8 @@ def adjust_contrast(image):
         new_contrast = random.uniform(0.8, 1.2)
     new_image = cv2.convertScaleAbs(image, alpha=new_contrast, beta=0)
     return new_image
-    
+
+
 def adjust_brightness(image):
     new_brightness: int = 1
     while new_brightness == 1:
@@ -58,6 +71,7 @@ def adjust_brightness(image):
     hsv_new = cv2.merge([h, s, vnew])
     new_image = cv2.cvtColor(hsv_new, cv2.COLOR_HSV2RGB)
     return new_image
+
 
 def adjust_saturation(image):
     new_sat: int = 1
@@ -125,13 +139,16 @@ def apply_random_augmentation_combinations() -> None:
             else:
                 img = None
             if img is not None:
-                with open(Path(f"{DATASET_PATH}/newTrainLabels.csv"), "a", newline="") as file:
+                with open(
+                    Path(f"{DATASET_PATH}/newTrainLabels.csv"), "a", newline=""
+                ) as file:
                     writer = csv.DictWriter(file, row.keys())
                     writer.writeheader()
                     writer.writerow(row)
                 for i in range(1, 5):
                     augment_image(i, row, img)
-                    
+
+
 def get_augs() -> list[str]:
     aug_choice = random.choice(["photo", "geo", "both"])
     augs_to_apply = []
@@ -143,8 +160,8 @@ def get_augs() -> list[str]:
         augs_to_apply.append(random.choice(PHOTOMETRIC_AUGS))
         augs_to_apply.append(random.choice(GEOMETRIC_AUGS))
     return augs_to_apply
-    
-                    
+
+
 def supplementary_augmentations(level: int) -> None:
     distribution_map = get_level_distribution_map(TRAINING_ANNOTATIONS_PATH)
     print(f"There are {len(distribution_map[str(level)])} images of level {str(level)}")
@@ -164,7 +181,9 @@ def supplementary_augmentations(level: int) -> None:
             augs_to_apply = get_augs()
             distorted_image = apply_augmentations(augs_to_apply, img)
             distortion_string = "_".join(augs_to_apply)
-            distorted_image_name = f"{image.removesuffix('.tif')}_{distortion_string}.tif"
+            distorted_image_name = (
+                f"{image.removesuffix('.tif')}_{distortion_string}.tif"
+            )
             cv2.imwrite(
                 f"{DATASET_PATH}/supplemented/{distorted_image_name}",
                 distorted_image,
@@ -176,7 +195,6 @@ def supplementary_augmentations(level: int) -> None:
             num_augs_fulfilled += 1
     distribution_map = get_level_distribution_map(TRAINING_ANNOTATIONS_PATH)
     print(f"There are {len(distribution_map[str(level)])} images of level {str(level)}")
-            
 
 
 def horizontal_flip(img):
@@ -230,7 +248,6 @@ def augment_data() -> None:
 
 
 if __name__ == "__main__":
-                
-    supplementary_augmentations()      
+    supplementary_augmentations()
     # apply_random_augmentation_combinations()
     # augment_data()
