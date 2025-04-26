@@ -69,13 +69,12 @@ def image_preprocessing(path_to_images: Path, new_path: Path) -> None:
 
 
 if __name__ == "__main__":
-    messidor_path = Path("../messidor-1/dataset_0.8/processed_images")
+    messidor_path = Path("../messidor-1/dataset_0.7/processed_images")
     make_path(messidor_path)
-    for base in BASE_LIST:
-        image_preprocessing(
-            Path("../messidor-1/dataset_0.8/images"),
-            Path("../messidor-1/dataset_0.8/processed_images"),
-        )
+    image_preprocessing(
+        Path("../messidor-1/dataset_0.7/images"),
+        Path("../messidor-1/dataset_0.7/processed_images"),
+    )
 
     # make_path(Path("../aptos-2019-dataset/dataset_0.8/processed_images"))
     # image_preprocessing(Path("../aptos-2019-dataset/dataset_0.8/images"), Path("../aptos-2019-dataset/dataset_0.8/processed_images"))

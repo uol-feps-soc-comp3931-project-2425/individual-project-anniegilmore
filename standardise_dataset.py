@@ -1,16 +1,17 @@
 import csv
+import os
 from pathlib import Path
 import random
 import shutil
 from utils import make_path
 
 # BASE_PATH = Path("../individual-project-dataset")
-BASE_PATH = Path("../aptos-2019-dataset")
+BASE_PATH = Path("../messidor-1")
 DATASET_PATH = Path(f"{BASE_PATH}/trainLabels.csv")
 CROPPED_DATASET_PATH = Path(f"{BASE_PATH}/trainLabels_cropped.csv")
 OG_DATASET_PATH = Path(f"{BASE_PATH}/untouched_dataset")
 # OG_ANNOTATIONS_PATH = Path(f"{OG_DATASET_PATH}/trainLabels.csv")
-OG_ANNOTATIONS_PATH = Path(f"{BASE_PATH}/whole_dataset.csv")
+OG_ANNOTATIONS_PATH = Path(f"{BASE_PATH}/annotations.csv")
 USING_ORIGINAL_DISTRIBUTION = False
 
 
@@ -26,7 +27,6 @@ def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
         "1": [],
         "2": [],
         "3": [],
-        "4": [],
     }
     with open(path_to_dataset, "r", newline="") as csvfile:
         dataset_reader = csv.reader(csvfile, delimiter=",")
@@ -75,17 +75,16 @@ def standardize_dataset(path_to_dataset: Path) -> str:
         dict_writer.writerows(dict_to_write)
     return path_to_labels
 
-
 def split_data(
-    original_annotations: Path, data_to_split: list[str], percentage_train: float
+    original_annotations: Path, data_to_split: list[str]
 ) -> None:
-    new_dataset_path: str = f"{BASE_PATH}/dataset_{percentage_train}"
+    new_dataset_path: str = f"{BASE_PATH}/dataset_0.7"
     make_path(Path(new_dataset_path))
     make_path(Path(f"{new_dataset_path}/images"))
-    # original_data_dir: Path = Path(f"{OG_DATASET_PATH}/resized_train/resized_train")
     original_data_dir: Path = Path(f"{BASE_PATH}/images")
-    num_validate_images: int = int(len(data_to_split) * (1 - percentage_train))
-    num_train_images: int = int(len(data_to_split) - num_validate_images)
+    num_train_images: int = int(len(data_to_split) * 0.7)
+    num_validate_images: int = int(len(data_to_split) * 0.2)
+    num_test_images: int = len(data_to_split) - num_train_images - num_validate_images
     validation_images = move_images(
         num_validate_images,
         data_to_split,
@@ -98,6 +97,12 @@ def split_data(
         original_data_dir,
         Path(f"{new_dataset_path}/images"),
     )
+    test_images = move_images(
+        num_test_images,
+        data_to_split,
+        original_data_dir,
+        Path(f"{new_dataset_path}/images"),
+    )
     write_moved_annotations(
         original_annotations,
         validation_images,
@@ -105,6 +110,9 @@ def split_data(
     )
     write_moved_annotations(
         original_annotations, train_images, Path(f"{new_dataset_path}/trainLabels.csv")
+    )
+    write_moved_annotations(
+        original_annotations, test_images, Path(f"{new_dataset_path}/testLabels.csv")
     )
 
 
@@ -116,7 +124,7 @@ def move_images(
         image_to_be_moved: str = random.choice(image_names)
         shutil.copy(original_dir / image_to_be_moved, new_dir)
         image_names.remove(image_to_be_moved)
-        moved_images.append(image_to_be_moved.removesuffix(".jpeg"))
+        moved_images.append(image_to_be_moved)
     return moved_images
 
 
@@ -136,11 +144,10 @@ def write_moved_annotations(
     annotations_path: Path, moved_images: list[str], annotations_file: Path
 ) -> None:
     write_csv_header(annotations_file)
-    # print(moved_images)
     with open(annotations_path, "r", newline="") as file:
         annotations: csv.DictReader[str] = csv.DictReader(file)
         for row in annotations:
-            if f"{row['image']}.jpg" in moved_images:
+            if f"{row['Image name']}" in moved_images:
                 write_csv_rows(annotations_file, row)
 
 
@@ -190,12 +197,39 @@ def reduce_dataset(
             count += 1
     return new_image_map
 
+def choose_validation_images(percentage_train: float) -> None:
+    # level_dist_map = get_level_distribution_map(OG_ANNOTATIONS_PATH)
+    print(os.listdir("../aptos-2019-dataset"))
+    level_dist_map = get_level_distribution_map("../aptos-2019-dataset/whole_dataset.csv")
+    # with open(OG_ANNOTATIONS_PATH, "r", newline="") as file:
+    #     annotations: csv.DictReader[str] = csv.DictReader(file)
+    #     for row in annotations:
+    #         if f"{row['image']}.jpg" in moved_images:
+    #             write_csv_rows(annotations_file, row)
+    # print(level_dist_map)
+    
+    total_images = 0
+    for level in level_dist_map:
+        total_images += len(level_dist_map[level])
+    num_val_images = (1 - percentage_train) * total_images
+    print(f"We need {num_val_images} val images")
+    
+    print(f"There are {len(level_dist_map['0'])} images with label 0")
+    print(f"There are {len(level_dist_map['1'])} images with label 1")
+    print(f"There are {len(level_dist_map['2'])} images with label 2")
+    print(f"There are {len(level_dist_map['3'])} images with label 3")
+    print(f"There are {len(level_dist_map['4'])} images with label 4")
+    
+    num_images_one_class = num_val_images / 4
+    print(num_images_one_class)
+
+
 
 if __name__ == "__main__":
     # count = get_level_distribution_map(OG_ANNOTATIONS_PATH)
     # path_to_labels = standardize_dataset(OG_ANNOTATIONS_PATH)
 
-    path_to_labels = group_images_into_3_classes(OG_ANNOTATIONS_PATH)
+    path_to_labels = "../messidor-1/annotations.csv"
 
     if USING_ORIGINAL_DISTRIBUTION:
         data: list[str] = [
@@ -207,6 +241,7 @@ if __name__ == "__main__":
     else:
         with open(path_to_labels, "r", newline="") as csvfile:
             dataset_reader = csv.reader(csvfile, delimiter=",")
-            data: list[str] = [f"{row[0]}.jpg" for row in dataset_reader]
+            data: list[str] = [f"{row[0]}" for row in dataset_reader]
             del data[0]
-    split_data(Path(path_to_labels), data, 0.8)
+            
+    split_data(Path(path_to_labels), data)
