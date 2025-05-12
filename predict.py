@@ -137,7 +137,7 @@ def predict_quality_of_images(
     prediction_details: PredictionDetails = get_predictions(
         path_to_model, path_to_labels, path_to_images
     )
-    with open(f"{PATH_TO_RESULTS}/results.json", "w", newline="") as f:
+    with open(f"{PATH_TO_RESULTS}/predictions.json", "w", newline="") as f:
         json_str = prediction_details.json(indent=2)
         f.write(json_str)
         f.flush()
