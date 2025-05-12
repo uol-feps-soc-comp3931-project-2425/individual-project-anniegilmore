@@ -8,7 +8,7 @@ from typing import Any
 
 
 def make_path(path_to_create: Path) -> None:
-    """ Creates new directory """
+    """Creates new directory"""
     Path.mkdir(path_to_create, parents=True, exist_ok=True)
     return
 
@@ -16,7 +16,7 @@ def make_path(path_to_create: Path) -> None:
 def setup_logger(
     name: str, log_file: Path, level: int = logging.INFO
 ) -> logging.Logger:
-    """ Initialises logger functionality for version control and tracking model progress """
+    """Initialises logger functionality for version control and tracking model progress"""
     make_path(log_file.parent)
     handler: logging.FileHandler = logging.FileHandler(str(log_file))
     handler.setFormatter(
@@ -29,7 +29,7 @@ def setup_logger(
 
 
 def get_device() -> torch.device:
-    """ Returns the hardware available to train the model on """
+    """Returns the hardware available to train the model on"""
     if torch.cuda.is_available():
         return torch.device("cuda")
     elif torch.backends.mps.is_available():
@@ -39,7 +39,7 @@ def get_device() -> torch.device:
 
 
 def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
-    """ Returns information about dataset distribution """
+    """Returns information about dataset distribution"""
     level_image_map: dict[str, list[str]] = {
         "0": [],
         "1": [],
@@ -56,7 +56,7 @@ def get_level_distribution_map(path_to_dataset: Path) -> dict[str, list[str]]:
 
 
 def calculate_accuracy(output: Any, target: Any) -> float:
-    """ Returns accuracy of model predictions compared to ground truth values """
+    """Returns accuracy of model predictions compared to ground truth values"""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         accuracy: float = balanced_accuracy_score(y_true=target, y_pred=output)

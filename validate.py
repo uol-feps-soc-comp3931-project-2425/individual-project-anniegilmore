@@ -16,8 +16,11 @@ logger = setup_logger(
     "validation", Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/training.log")
 )
 
-def create_confusion_matrix(y_true: list, y_pred: list, epoch: bool, validation_cm: bool) -> None:
-    """ Creates and saves confusion matrix to visualise model predictions vs ground truth """
+
+def create_confusion_matrix(
+    y_true: list, y_pred: list, epoch: bool, validation_cm: bool
+) -> None:
+    """Creates and saves confusion matrix to visualise model predictions vs ground truth"""
     classes = ("0", "1", "2", "3")
     cf_matrix: np.ndarray = confusion_matrix(y_true, y_pred)
     cf_matrix_dataframe: pd.DataFrame = pd.DataFrame(
@@ -41,6 +44,7 @@ def create_confusion_matrix(y_true: list, y_pred: list, epoch: bool, validation_
     plt.close()
     return
 
+
 def model_validation_data(
     dataloader: DataLoader,
     model: DiabeticRetinopathyNet,
@@ -49,7 +53,7 @@ def model_validation_data(
     epoch: int,
     device,
 ) -> tuple[float, float]:
-    """ Splits validation subset into batches and predicts DR levels of images """
+    """Splits validation subset into batches and predicts DR levels of images"""
     y_pred: list = []
     y_true: list = []
     for batch_data in dataloader:
@@ -77,7 +81,7 @@ def validate(
     epoch: int,
     device,
 ) -> tuple[dict[str, list], float, float]:
-    """ Runs validation subset through model to assess model performance """
+    """Runs validation subset through model to assess model performance"""
     model.eval()
     with torch.no_grad():
         validation_loss: float = 0.0
@@ -91,4 +95,3 @@ def validate(
         f"epoch {epoch}: Validation  loss: {validation_loss}, accuracy: {validation_accuracy}%"
     )
     return progress_tracker, validation_accuracy, validation_loss
-
