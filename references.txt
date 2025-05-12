@@ -1,2 +1,0 @@
-Focal Loss for class weights:
-https://saturncloud.io/blog/how-to-use-class-weights-with-focal-loss-in-pytorch-for-imbalanced-multiclass-classification/

@@ -4,78 +4,49 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 from utils import make_path
+from cv2.typing import MatLike
 
-BASE_PATH = Path("../messidor-1")
-BASE_LIST = [
-    "Base11",
-    "Base12",
-    "Base13",
-    "Base14",
-    "Base21",
-    "Base22",
-    "Base23",
-    "Base24",
-    "Base31",
-    "Base32",
-    "Base33",
-    "Base34",
-]
+def apply_histogram_equalization(image: MatLike) -> MatLike:
+    """ Does histogram equalization on image to adjust brightness """
+    yuv_image: MatLike = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
+    Y_channel, U_channel, V_channel = cv2.split(yuv_image)
+    equalized_Y: MatLike = cv2.equalizeHist(Y_channel)
+    equalized: MatLike = cv2.merge([equalized_Y, U_channel, V_channel])
+    converted: MatLike = cv2.cvtColor(equalized, cv2.COLOR_YUV2BGR)
+    return converted
 
-
-def crop_image(path_to_images: Path, image):
-    lower = np.array([0, 0, 0], dtype="uint8")
-    upper = np.array([1, 1, 1], dtype="uint8")
-    image = cv2.imread(Path(f"{path_to_images}/{image}"))
-    if image is None:
-        print(f"Issue with image {image}")
-        return None
-    greyscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    mask = cv2.inRange(image, lower, upper)
-    output = cv2.bitwise_and(image, image, mask=mask)
-    _, thresholded = cv2.threshold(greyscale_image, 10, 255, cv2.THRESH_BINARY)
+def crop_image(image: MatLike) -> MatLike:
+    """ Implements Smart Cropping of image to eliminate black background """
+    lower: np.ndarray = np.array([0, 0, 0], dtype="uint8")
+    upper: np.ndarray = np.array([1, 1, 1], dtype="uint8")
+    greyscale_image: MatLike = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    binarisation_mask: MatLike = cv2.inRange(image, lower, upper)
+    binarisation_output: MatLike = cv2.bitwise_and(image, image, mask=binarisation_mask)
+    _, binarised_image = cv2.threshold(greyscale_image, 10, 255, cv2.THRESH_BINARY)
     contours, _ = cv2.findContours(
-        thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
+        binarised_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE
     )
-    cv2.drawContours(output, contours, -1, 255, 3)
-    region_of_interest = max(contours, key=cv2.contourArea)
-    x, y, w, h = cv2.boundingRect(region_of_interest)
-    cv2.rectangle(thresholded, (x, y), (x + w, y + h), (0, 255, 0), 2)
-    cropped_image = image[y : y + h, x : x + w]
+    cv2.drawContours(binarisation_output, contours, -1, 255, 3)
+    largest_detected_shape: MatLike = max(contours, key=cv2.contourArea)
+    x_coord, y_coord, width, height = cv2.boundingRect(largest_detected_shape)
+    cv2.rectangle(binarised_image, (x_coord, y_coord), (x_coord + width, y_coord + height), (0, 255, 0), 2)
+    cropped_image: MatLike = image[y_coord : y_coord + height, x_coord : x_coord + width]
     return cropped_image
 
 
-def denoise_image(image):
-    blurred = cv2.GaussianBlur(image, (3, 3), 0)
-    return blurred
-
-
-def histogram_equalization(image):
-    yuv_image = cv2.cvtColor(image, cv2.COLOR_BGR2YUV)
-    Y, U, V = cv2.split(yuv_image)
-    equalized_Y = cv2.equalizeHist(Y)
-    equalized = cv2.merge([equalized_Y, U, V])
-    converted = cv2.cvtColor(equalized, cv2.COLOR_YUV2BGR)
-    return converted
-
-
-def image_preprocessing(path_to_images: Path, new_path: Path) -> None:
+def run_preprocessing_pipeline(path_to_images: Path, new_path: Path) -> None:
+    """ Runs full processing path for every image in dataset, saving processed images """
+    make_path(new_path)
     for image in tqdm(os.listdir(path_to_images)):
-        cropped_image = crop_image(path_to_images, image)
-        if cropped_image is None:
+        image: MatLike = cv2.imread(Path(f"{path_to_images}/{image}"))
+        if image is None:
+            print(f"Issue with image {image}")
             continue
-        blurred_image = denoise_image(cropped_image)
-        equalized = histogram_equalization(blurred_image)
+        cropped_image: MatLike = crop_image(image)
+        equalized: MatLike = apply_histogram_equalization(cropped_image)
         cv2.imwrite(f"{new_path}/{image}", equalized)
+    return
 
 
 if __name__ == "__main__":
-    messidor_path = Path("../messidor-1/dataset_0.8/processed_images")
-    make_path(messidor_path)
-    for base in BASE_LIST:
-        image_preprocessing(
-            Path("../messidor-1/dataset_0.8/images"),
-            Path("../messidor-1/dataset_0.8/processed_images"),
-        )
-
-    # make_path(Path("../aptos-2019-dataset/dataset_0.8/processed_images"))
-    # image_preprocessing(Path("../aptos-2019-dataset/dataset_0.8/images"), Path("../aptos-2019-dataset/dataset_0.8/processed_images"))
+    run_preprocessing_pipeline(Path("../messidor-1/dataset_0.7/images"), Path("../messidor-1/dataset_0.7/processed_images"))

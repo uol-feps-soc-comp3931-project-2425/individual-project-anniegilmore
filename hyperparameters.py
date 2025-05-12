@@ -3,38 +3,56 @@ from pathlib import Path
 from constants import ITERATION, DATA_PATH
 from utils import setup_logger
 
+# defining hyperparameters for this iteration of training
 BATCH_SIZE = 64
 NUM_WORKERS = 4
-LEARNING_RATE = 0.01
-DROPOUT = 0.2
+LEARNING_RATE = 0.001
+WEIGHT_DECAY = 0.001
+DROPOUT = 0.5
 CLASSIFIER_STRUCT = """
-            nn.Conv2d(in_features=last_channel, out_features=32),
-            nn.ReLU(),
-            nn.Conv2d(in_features=32, out_features=32),
+        resnet50 = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+        for name, param in resnet50.named_parameters():
+            if "layer_4" in name:
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
+                
+        last_channel = resnet50.fc.in_features
+        
+        self.base_model = nn.Sequential(
+            resnet50.conv1,
+            resnet50.bn1,
+            resnet50.relu,
+            resnet50.maxpool,
+            resnet50.layer1,
+            resnet50.layer2,
+            resnet50.layer3,
+            resnet50.layer4,
+        )
+        
+        self.custom_layer = nn.Sequential(
+            nn.Conv2d(in_channels=last_channel, out_channels=32, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.MaxPool2d(kernel_size=2, stride=2),
+            nn.Dropout(0.5),
+        )
+        
 
-            nn.Conv2d(in_features=32, out_features=64),
-            nn.ReLU(),
-            nn.Conv2d(in_features=64, out_features=128),
-            nn.ReLU(),
-            nn.MaxPool2d(kernel_size=2, stride=2),
-
+        self.classifier = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=128, out_features=128),
             nn.ReLU(),
-            nn.BatchNorm2d(),
-            nn.Dropout(0.1),
-            nn.Linear(in_features=128, out_features=n_diabetic_retinopathy_levels),
-
-            nn.Softmax(dim=1),"""
+            nn.BatchNorm1d(num_features=32 * 3 * 3),
+            nn.Linear(in_features=32 * 3 * 3, out_features=n_diabetic_retinopathy_levels),
+        )
+            """
 
 EXTRA_INFO = """
-Dropout increased from 0.1 to 0.2
+Potential final iteration
 """
 
 
 def log_hyperparameters() -> None:
+    """Logging hyperparameters for version control"""
     hyperparameter_logger = setup_logger(
         "hyperparameters",
         Path(f"{DATA_PATH}/{ITERATION.replace(' ', '_')}/logs/hyperparameters.log"),
