@@ -1,0 +1,1202 @@
+{
+  "model": "training_resources/Iteration_69/checkpoints/checkpoint-epoch-17.pth",
+  "total_images_scored": 239,
+  "time_taken": 344.5389368534088,
+  "predicted_grades": [
+    {
+      "image_name": "20051020_44338_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 0
+    },
+    {
+      "image_name": "20051020_44598_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_44782_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20051020_44901_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20051020_44982_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051020_45004_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20051020_45050_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_45137_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_52801_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_57157_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051020_57566_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_57622_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_62461_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051020_62709_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_63045_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_63141_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051020_63269_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051020_64836_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051020_64945_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051021_40018_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051021_51418_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051021_51936_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051021_57862_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051021_59504_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051213_61892_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051213_62188_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 2
+    },
+    {
+      "image_name": "20051214_40361_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20051214_40767_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20051214_50812_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_51469_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 1
+    },
+    {
+      "image_name": "20051214_51609_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_52204_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_52695_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051214_52707_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_53168_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051214_56169_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_56269_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_56778_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_57230_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_57260_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_57377_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 3
+    },
+    {
+      "image_name": "20051214_57940_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060522_43643_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060522_45111_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060522_45583_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060522_45691_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060522_46149_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060522_46454_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20060523_43123_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060523_43174_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_43196_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_43248_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060523_45235_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_45300_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060523_45369_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_45697_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_45787_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_48199_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_48477_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_48499_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_48572_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_48990_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_49176_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060523_49288_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 2
+    },
+    {
+      "image_name": "20060523_49791_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_49859_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_49875_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_49928_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_50469_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060523_50539_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060529_56420_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060529_56442_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060529_56730_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060529_56834_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060529_57287_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060529_57372_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060529_57447_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060530_36788_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060530_36860_0100_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060530_36895_0100_PP.tif",
+      "predicted_grade": 2,
+      "truth": 3
+    },
+    {
+      "image_name": "20060530_51254_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060530_53152_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060530_53233_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060530_53761_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060530_53816_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060530_54011_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060530_54242_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20060530_54556_0100_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20060530_55451_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20060530_55837_0100_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20051216_44660_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051216_45245_0200_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051216_45375_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20051216_47514_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051216_47536_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_38711_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_39155_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_39687_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_41177_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_42290_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_42308_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_43460_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060407_43746_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_44285_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 3
+    },
+    {
+      "image_name": "20060407_44400_0200_PP.tif",
+      "predicted_grade": 3,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_44510_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_44743_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_44866_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_45247_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_45611_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060407_46235_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060407_46394_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20060410_40481_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20060410_40605_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060410_41098_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060410_41191_0200_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20060410_41209_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060410_41356_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060410_41880_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060410_43847_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20060410_44248_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 3
+    },
+    {
+      "image_name": "20060410_47042_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060410_47331_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20060411_57853_0200_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060411_57879_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20060411_58550_0200_PP.tif",
+      "predicted_grade": 3,
+      "truth": 0
+    },
+    {
+      "image_name": "20060411_59062_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060411_59176_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060411_59190_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060411_59657_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060411_59941_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060411_60028_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20060411_60283_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 1
+    },
+    {
+      "image_name": "20060411_61060_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20060411_61196_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 3
+    },
+    {
+      "image_name": "20060411_61494_0200_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20060411_61869_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060411_62228_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20060412_51746_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_51860_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_51952_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20060412_52038_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_52098_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_52194_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_52668_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_52758_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20060412_57974_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_58032_0200_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_58287_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_58819_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_58965_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20060412_59196_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_59355_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20060412_60545_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_60895_0200_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20060412_61450_0200_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051109_57451_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051109_59582_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051110_38352_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051110_38442_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051110_38702_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051116_43995_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_44026_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_44051_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_44083_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_44482_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_44718_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_44804_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051116_54454_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 2
+    },
+    {
+      "image_name": "20051116_54832_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051116_55649_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051116_58804_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20051116_58850_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051117_37042_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051117_37321_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_53991_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_54476_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_55037_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_55086_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_55269_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_58824_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_58921_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_58962_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_59186_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_59749_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_59916_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60040_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60066_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60140_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60490_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60585_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60691_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051130_60740_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051201_37382_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051201_38103_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051201_38411_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051201_38537_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051202_37162_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_37199_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_39630_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_39708_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_39797_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_41143_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_48264_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_48421_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051202_51488_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_54197_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_54477_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_54498_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_55582_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_55650_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_55669_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_55834_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_55883_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051202_55984_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20051205_31934_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051205_32966_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051205_35162_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 3
+    },
+    {
+      "image_name": "20051205_35339_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051205_35392_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051205_57780_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_57799_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_58080_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_58109_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_58613_0400_PP.tif",
+      "predicted_grade": 2,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_59337_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_59379_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_59715_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_59754_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_59833_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 0
+    },
+    {
+      "image_name": "20051205_59923_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 0
+    },
+    {
+      "image_name": "20051207_56219_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    },
+    {
+      "image_name": "20051207_62266_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051208_39498_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 2
+    },
+    {
+      "image_name": "20051208_39572_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 2
+    },
+    {
+      "image_name": "20051208_40972_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 3
+    },
+    {
+      "image_name": "20051212_36525_0400_PP.tif",
+      "predicted_grade": 0,
+      "truth": 1
+    },
+    {
+      "image_name": "20051212_40940_0400_PP.tif",
+      "predicted_grade": 1,
+      "truth": 3
+    },
+    {
+      "image_name": "20051212_41144_0400_PP.tif",
+      "predicted_grade": 3,
+      "truth": 3
+    }
+  ]
+}
