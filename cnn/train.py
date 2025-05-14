@@ -167,7 +167,7 @@ def run_batch(
     )
     true_labels = targets.data.cpu().numpy()
     accuracy += calculate_accuracy(predicted_labels, batch_data["levels"])
-    training_loss: torch.Tensor = model.get_loss(model_output, targets)
+    training_loss: torch.Tensor = model.get_loss(model_output["level"], targets)
     training_loss.backward()
     optimizer.step()
     current_loss += training_loss.item()

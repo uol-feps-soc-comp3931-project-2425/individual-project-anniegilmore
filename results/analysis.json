@@ -1,29 +1,29 @@
 {
     "overall": {
         "average accuracy": 72.59414225941423,
-        "average sensitivity": 40.58157351976452,
-        "average specificity": 81.2668881367219
+        "average sensitivity": 38.743611670627345,
+        "average specificity": 81.09963968798952
     },
     "level specific": {
         "0": {
             "accuracy": 66.52719665271967,
-            "sensitivity": 57.65765765765766,
-            "specificity": 74.21875
+            "sensitivity": 65.97938144329896,
+            "specificity": 66.90140845070422
         },
         "1": {
             "accuracy": 69.4560669456067,
-            "sensitivity": 16.39344262295082,
-            "specificity": 87.64044943820225
+            "sensitivity": 31.25,
+            "specificity": 75.36231884057972
         },
         "2": {
             "accuracy": 73.64016736401673,
-            "sensitivity": 20.833333333333336,
-            "specificity": 79.53488372093022
+            "sensitivity": 10.204081632653061,
+            "specificity": 90.0
         },
         "3": {
             "accuracy": 80.75313807531381,
-            "sensitivity": 67.44186046511628,
-            "specificity": 83.6734693877551
+            "sensitivity": 47.540983606557376,
+            "specificity": 92.13483146067416
         }
     }
 }
