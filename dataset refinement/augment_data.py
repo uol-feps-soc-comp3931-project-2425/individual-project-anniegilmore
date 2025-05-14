@@ -158,8 +158,10 @@ def apply_supplementary_augmentations(
     distribution_map: dict[str, list], level: int
 ) -> None:
     """function to augment individual class with decided augmentation techniques"""
-    num_augs_to_apply: int = 2500 - len(distribution_map[level])
+    num_augs_to_apply: int = 2500 - len(distribution_map[str(level)])
     num_augs_applied: int = 0
+    if num_augs_to_apply == 0:
+        print(f"Full class for level {level}")
     while num_augs_applied < num_augs_to_apply:
         image_name: str = random.choice(distribution_map[level])
         if image_name.endswith("PP.tif"):

@@ -53,12 +53,12 @@ def get_accuracies(prediction_data: dict) -> dict:
             * 100,
             "sensitivity": (
                 metrics["true_positive"]
-                / (metrics["true_positive"] + metrics["false_positive"])
+                / (metrics["true_positive"] + metrics["false_negative"])
             )
             * 100,
             "specificity": (
                 metrics["true_negative"]
-                / (metrics["true_negative"] + metrics["false_negative"])
+                / (metrics["true_negative"] + metrics["false_positive"])
             )
             * 100,
         }

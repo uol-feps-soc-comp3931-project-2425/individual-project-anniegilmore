@@ -65,7 +65,7 @@ def model_validation_data(
         y_pred.extend(y_pred_labels)
         labels = target_scores.data.cpu().numpy()
         y_true.extend(labels)
-        val_loss: torch.Tensor = model.get_loss(model_output, labels)
+        val_loss: torch.Tensor = model.get_loss(model_output["level"], target_scores)
         validation_loss += val_loss.item()
         validation_accuracy += calculate_accuracy(y_pred_labels, batch_data["levels"])
     average_loss: float = round(validation_loss / len(dataloader), 3)
